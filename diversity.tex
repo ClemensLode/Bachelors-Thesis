@@ -3,65 +3,65 @@
 \usepackage{graphicx}
 \usepackage{dsfont}
 
+
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of "TeX Unbound" for suggested values.
+    % See pp. 199-200 of Lamport's "LaTeX" book for details.
+    %   General parameters, for ALL pages:
+    \renewcommand{\topfraction}{0.9}	% max fraction of floats at top
+    \renewcommand{\bottomfraction}{0.8}	% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \setcounter{dbltopnumber}{2}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}	% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}	% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}	% require fuller float pages
+	% N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}	% require fuller float pages
+
+	% remember to use [htp] or [htpb] for placement
+
+
 \input{Rahmen_Top}
 
 
 \title{Reducing diversity loss in estimation of distribution algorithms}
-\author{Clemens Lode, J\"urgen Branke, John Shapiro}
+\author{Clemens Lode}
 
 \input{Rahmen_Mid}
 
 
+
+
+
+\begin{document}
 \setcounter{chapter}{0}
-\chapter{Reducing diversity loss in estimation of distribution algorithms}
+\chapter{Reducing diversity loss in EDAs}
 
 \section{Introduction}
 
-TODO
-
-%%Introduction:
-
-%With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. 
-
-%The flat landscape is the simplest problem in which this can be studied.
-%It was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class, and it was shown that using an exponentially large population size would avoid this.
-
-%In this paper I will look into a different approach to the problem of diversity loss
-
+With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. In a flat landscape it was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class. One way to counter this is to increase the population size according to the problem, a different approach is to directly change the distribution vector.
 
 \section{Abstract}
 
-TODO
-
-%Using the same general class of EDAs as \cite{Shapiro} (probability model is build using only data sampled from the current probability model) and the result we come to the conclusion that by changing the distribution vector p accordingly to the population size \(n\) and the number of selected individuals \(\tilde{n}\), we can correct the diversity loss. This is true for a flat landscape and tests have shown that this correction also works for non-flat problems.
-
-%Abstract. A very general class of EDAs is deﬁned, on which universal results
-%on the rate of diversity loss can be derived. This EDA class, denoted SML-EDA,
-%requires two restrictions: 1) in each generation, the new probability model is build
-%using only data sampled from the current probability model; and 2) maximum
-%likelihood is used to set model parameters. This class is very general; it includes
-%simple forms of many well-known EDAs, e.g. BOA, MIMIC, FDA, UMDA, etc.
-%To study the diversity loss in SML-EDAs, the trace of the empirical covariance
-%matrix is the proposed statistic. Two simple results are derived. Let N be the
-%number of data vectors evaluated in each generation. It is shown that on a ﬂat
-%landscape, the expected value of the statistic decreases by a factor 1−1/N in each
-%generation. This result is used to show that for the Needle problem, the algorithm
-%will with a high probability never ﬁnd the optimum unless the population size
-%grows exponentially in the number of search variables.
-
+Using the same general class of EDAs as \cite{Shapiro} (probability model is build using only data sampled from the last generation), the result that the diversity loss of sampling \(\tilde{n}\) individuals from a population is \(1 - \frac{1}{\tilde{n}}\) and the calculated result of diversity loss (\(1 - \frac{1}{n}\)) of generating a population with \(n\) individuals from a distribution vector \(p\) we come to the conclusion that by changing the distribution vector \(p\) accordingly to the population size \(n\) and the number of selected individuals \(\tilde{n}\), we can reduce the diversity loss. This is true for a flat landscape and tests have shown that while this correction does not outperform a standard Laplace correction in terms of population diversity it works very well for actual non-flat problem like OneMax.\\
+The resulting method is to correct \(p\) to \(\frac{1}{2}(1 - \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) for \(p < \frac{1}{2}(1 - \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\), to \(\frac{1}{2}(1 + \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) for \(p > \frac{1}{2}(1 + \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) and to \(\frac{1}{2}\) else.\\
 
 \newpage
 \section{Definitions}
 
 The diversity of a given population can be measured by the 'trace of the empirical co-variance matrix'.\\
 Let
-\begin{enumerate}
+\begin{itemize}
 \item \(C\): number of components of each individual\\
 \item \(n\): number of individuals in the population\\
 \item \(\tilde{n}\): number of selected individuals\\
 \item \(A\): set of different values a component can take\\
 \item \(|A|\): number of different values a component can take\\
-\end{enumerate}
+\end{itemize}
 
 \begin{equation}
 x^{\mu}_{i} \text{: component i of individual \(\mu\)}
@@ -78,10 +78,23 @@ v = \frac{1}{|A|} \sum_{i=1}^{C} \sum_{a=0}^{|A|-1} v^{a}_{i} (1 - v^{a}_{i})
 Our goal is to determine the resulting diversity of a population created on a given distribution \(p\), so we have to calculate all possible combinations of individuals in that populations of the size \(n\). For simplicity we are looking at strings of the size 1, i.e. \(C = 1\), in the case of UMDAs on a flat landscape the results for \(C > 1\) are the same, see chapter X.
 
 To create a population with the distribution p each individual has in its component with the probability \(p\) a '1' (or with the probability \((1-p)\) a '0'). Creating a population with the size of \(n\) with \(|A|\) different values in each component we then have a combination with repetition, i.e. there would be
+
+%TODO ueberhaupt relevant?
 \begin{equation}
 \frac{(|A|+n-1)!}{n!(|A|-1)!} = {|A|+n-1 \choose n}
 \end{equation}
 possible different population. For example for \(|A|=2\) there would be \(n+1\) different populations (...000, ...001, ...011, ...111, ...) as the position of an individual in the population is not important. In this paper I will only look into the case of \(|A| = 2\), i.e. bitsrings. The main difference with \(|A|>2\) compared to \(|A|=2\) is that the probability for a certain population is different and that we no longer can identify a certain population with a 'k', with \(k\) being the number of '1's.
+
+
+%---------
+
+%With \(|A| > 2\) we have to use different definitions.
+
+%We define \(k_{a}\) as the number of components with the value \(a\), i.e. \(k_{3}\) would refer to as the number of 3's in the string.
+
+%There are two ways to create a population with \(|A| > 2\). We can either assign a probability \(p\) to each component and value and then using a roullette wheel to randomly select a resulting 
+
+
 
 The probability for a certain population is 
 \begin{equation}
@@ -145,7 +158,7 @@ It can be shown that this can be reduced further. The exact prove will be given 
 \begin{equation}
 d = d_p = 1 - \frac{1}{n}
 \end{equation}
-So it is independant from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
+So it is independent from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
 %% The formula will be generalized in chapter 3. TODO
 
 According to Shapiro \cite{Shapiro} we also know that selecting l individuals from this population of size n will result in a diversity loss (compared to \(p(1-p)\)) of the same factor \(1 - \frac{1}{n}\).
@@ -217,14 +230,6 @@ else
     q = 0.5;
 \end{verbatim}
 
-%\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
-%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
-%\ \ else\\
-%\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
-%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
-%\ \ else\\
-%\ \ \ \ q\ =\ 0.5;\\
-
 or for the general formula with \(n \neq 2\tilde{n}\) (\(M = n, N = \tilde{n}\)):\\
          
 \begin{verbatim}
@@ -237,20 +242,12 @@ else
     q = 0.5;
 \end{verbatim}
 
-%\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
-%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
-%\ \ else\\
-%\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
-%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
-%\ \ else\\
-%\ \ \ \ q\ =\ 0.5;\\
-
-The main advantage of this code is that only minimal changes to the code have to be made because this way of reducing the diversity loss is problem independant (at least for bitstrings on a flat landscape in UDMA). The code has to be inserted just after determining the distribution \(p\).
+The main advantage of this code is that only minimal changes to the code have to be made because this way of reducing the diversity loss is problem independent (at least for bitstrings on a flat landscape in UDMA). The code has to be inserted just after determining the distribution \(p\).
 
 
 \section{Multiple components}
 
-If we set \(C > 1\), i.e. bitstrings longer than one bit, we will get similar results. While equation \(3\) does use \(C\) to determine the diversity of a generated population we can look at each component seperately as they are not connected in UMDA (in a flat fitness landscape). All bits belonging to one component in the population are created with an own distribution \(p\) that is independant from the other \(p\). Therefor we can handle a problem with \(C > 1\) like \(C\) seperate problems, each with one component.
+If we set \(C > 1\), i.e. bitstrings longer than one bit, we will get similar results. While equation \(3\) does use \(C\) to determine the diversity of a generated population we can look at each component seperately as they are not connected in UMDA (in a flat fitness landscape). All bits belonging to one component in the population are created with an own distribution \(p\) that is independent from the other \(p\). Therefor we can handle a problem with \(C > 1\) like \(C\) seperate problems, each with one component.
 How interconnected components would affect the diversity is out of the scope of this paper and remains to be investigated.
 
 
@@ -259,80 +256,102 @@ How interconnected components would affect the diversity is out of the scope of 
 
 \subsection{General test configuration}
 
-TODO
+For both tests, OneMax and Flat fitness landscape, 50 seperate were repeatedly (with varying parameters) made.\\
+6 different algorithms were tested:
 
-\subsection{'Needle in a Haystack' problem}
+\begin{itemize}
+\item {\bf No correction}: The new distribution \(p\) for each component is simply calculated by dividing the number of 1's by the sample size
+\item {\bf No correction + bounded}: Same as (1) but in the case \(p\) gets above \(1 - \frac{1}{\tilde{n}}\) or below \(\frac{1}{\tilde{n}}\) it is corrected to these boundaries
+\item {\bf Laplace correction}: The new \(p\) is calculated by \(\frac{k + 1}{\tilde{n} + 2}\)
+\item {\bf Corrected distribution}: Same as (1), but the resulting \(p\) is corrected with the formula discussed in the previous section
+\item {\bf Corrected distribution + bounded}: Same as (2) but with the correction of \(p\) before checking the boundaries
+\item {\bf Corrected distribution + Laplace}: Same as (3) but with the correction of \(p\) afterwards
+\end{itemize}
 
-TODO
+Using the for each component newly calculated distribution \(p\) we generate the new population of the size \(n\) depending on our parameter called 'Exact Random Distribution'. If it is not set we create each member of the population individually, if it is set we distribute \(pn\) '1' and \((1-p)n\) '0' between the individuals.\\
+Tests have shown that the variance of the runs themselves are of no significance so it is are not included in the graphs.\\
+The graphs were created with the help of gnuplot and C++, the actual program will be availble with a later version of this paper on CD-ROM.\\
 
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack0.png}
+\subsection{Flat fitness landscape}
+
+In this test we examine the behaviour of the algorithms in terms of their diversity with varying parameters on a flat fitness landscape. It is basicly a 'needle in a haystack' problem where the needle is not found within the 200 generations, i.e. all solutions have the same fitness. The problem size is a bitstring with length 10, i.e. we have 10 components.\\
+The additional graph, '1 - 1/N loss / generation', denotes the theoretical loss of diversity according to \cite{Shapiro}.
+
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack000_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack1.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack001_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack2.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack002_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack3.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack003_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack4.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack004_diversity.png}
 \end{figure}
-
-Graphs 6 - 10 are with correction of extreme values of p (\(p = 0.0 or p = 1.0\))
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack5.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack005_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack6.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack006_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack7.png}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_haystack007_diversity.png}
 \end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack8.png}
-\end{figure}
-
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_haystack9.png}
-\end{figure}
-
 
 \newpage
 \subsection{OneMax problem}
 
-TODO
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_onemax0.png}
+In this test we examine the behaviour of the algorithms in terms of their fitness with varying parameters with the problem OneMax. The goal is to find the string '111\dots', each '1' in a component of an individual gets rewarded by one fitness point. In our test the problem size if 500.\\
+For each generation only the highest fitness of each population is taken into account. Again the graph shows the average of the fitness values of all runs.\\
+
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax000_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax001_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax002_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax003_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax004_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax005_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax006_fitness.png}
+\end{figure}
+\begin{figure}[htp]
+\includegraphics[scale=0.5]{graph_onemax007_fitness.png}
 \end{figure}
 
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_onemax1.png}
-\end{figure}
 
-\begin{figure}[h!]
-\includegraphics[scale=0.4]{graph_onemax2.png}
-%\caption{description}
-\end{figure}
 
 \newpage
 \section{Conclusions}
 
-TODO
+\subsection{Flat fitness landscape}
+
+With the tests we have shown that our 'Corrected distribution' algorithm does significantly reduce the diversity loss compared to an algorithm with no correction. Making sure that the algorithm does not stall in a component with \(p < \frac{1}{\tilde{n}}\) or \(p > 1 - \frac{1}{\tilde{n}}\) ("bounded") makes sure that the diversity does not drop to zero in the long run. 'Corrected distribution' does not outperform 'Laplace correction' as the latter always corrects any distribution towards \(p = 0.5\).
+
+\subsection{OneMax}
+
+While the OneMax problem does not represent a problem with a real flat fitness landscape (thus our theoretical base does not apply here), a flat fitness landscape can occur if the variance drops and/or the fitness values are very similar (e.g. 010, 100, 001).\\
+'Corrected distribution + Laplace' is clearly worse than 'Laplace correction', the changes made to the distribution \(p\) (that we determined on base of the selected individuals) are too big in order to get useful results. As expected 'Laplace correction' itself does not score well, it converges at a significant lower fitness level.\\
+'Exact random distribution' seems to generally improve the convergence of methods using not the 'Laplace correction' while being indifferent or being even worse for the 'Laplace correction' itself.\\
+At least for the case of 'OneMax' and the given parameter configuration, 'Corrected distribution' in connection with 'Exact Random Distribution' seems to outperform all other methods.
 
 \section{Fields of further research}
 
-TODO
+According to \cite{Shapiro} the diversity loss of \(1 - \frac{1}{n}\) is independent of \(|A|\) and is valid for a whole class of so-called SML-EDAs, including UMDA, MIMIC, FDA or BOA. In this paper I have assumed that \(|A| = 2\), i.e. that a component can only take two different values. With values \(|A| > 2\) the proof has to be adapted from equation (5) on, depending on how one creates such a population. It also remains to be investigated how a similar correction of the diversity loss is possible with other methods than UMDA that fall into the category of the SML-EDAs. It is probable that the idea itself, i.e. determining the loss of variance due to sampling and calculating it backwards in order to correct the distribution \(p\), seems to be applicable to many different forms of SML-EDAs or even EDAs in general - assuming one can calculate the actual diversity loss.
 
 \begin{thebibliography}{99}
 \bibitem{Shapiro} {\sc Shapiro, J.L.:}  \textit{Diversity loss in general estimation of distribution algorithms}, 2006.
