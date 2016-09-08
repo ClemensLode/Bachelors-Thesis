@@ -1,8 +1,22 @@
-\documentclass[a4paper,twoside]{report}
+\documentclass[12pt, a4paper]{scrartcl}
 
 \usepackage{graphicx}
 \usepackage{dsfont}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fancyhdr}
+\usepackage{url}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{tweaklist}
+\pagestyle{headings}
 
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\enumhook}{\setlength{\topsep}{-10pt}\setlength{\itemsep}{0pt}}
+\renewcommand{\labelenumi}{(\Roman{enumi})}
+\renewcommand{\labelenumii}{(\Roman{enumi}.\Roman{enumii})}
+\renewcommand{\labelenumiii}{(\alph{enumiii})}
+\renewcommand{\labelenumiv}{(\arabic{enumiv})}
 
 % Alter some LaTeX defaults for better treatment of figures:
     % See p.105 of "TeX Unbound" for suggested values.
@@ -25,30 +39,69 @@
 	% remember to use [htp] or [htpb] for placement
 
 
-\input{Rahmen_Top}
-
-
-\title{Reducing diversity loss in estimation of distribution algorithms}
+%%\input{Rahmen_Top}
+%%\title{Reducing diversity loss in estimation of distribution algorithms}
 \author{Clemens Lode}
-
-\input{Rahmen_Mid}
-
-
-
-
+%%\input{Rahmen_Mid}
 
 \begin{document}
-\setcounter{chapter}{0}
-\chapter{Reducing diversity loss in EDAs}
+
+%
+% Deckblatt
+%
+\thispagestyle{empty}
+\noindent
+\begin{tabular}{ll}
+  \hspace{-2mm}%
+  \parbox[b]{0.88\textwidth}
+  {
+    \flushleft
+    Institut für Angewandte Informatik\\
+    und Formale Beschreibungsverfahren\\
+    Universität Karlsruhe (TH)\\
+    \vspace{1em}
+
+    Forschungsgruppe Effiziente Algorithmen\\
+    Prof. Dr. Hartmut Schmeck\\
+  } & 
+\includegraphics[height=7em]{AIFB_Logo_senkrecht1}\\
+
+\end{tabular}
+
+\vspace{3cm}
+
+\noindent
+Studienarbeit "Reducing diversity loss in estimation of distribution algorithms"\\
+Sommersemester 2006
+\vspace{3cm}
+
+\noindent
+{\Large\textbf{Reducing diversity loss\\ in estimation of distribution algorithms}}
+
+\vspace{3cm}
+
+\noindent
+\begin{tabular}{ll}
+Autor:	  &Clemens Lode\\
+Betreuer:	&J\"urgen Branke
+\end{tabular}
+%
+% Ende Deckblatt
+%
+\newpage
+
+\tableofcontents
+
+\newpage
 
 \section{Introduction}
 
-With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. In a flat landscape it was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class. One way to counter this is to increase the population size according to the problem, a different approach is to directly change the distribution vector.
+Many Estimation of Distribution Algorithms (EDAs) can reach a state where the probability of ever finding the optimum is zero. This is due to diversity loss, i.e. one or more components of all individuals in the populations become the same value. If a different value is required in the optimum, the optimum will never be sampled. If no action is taken to either prevent uniformity of the values in a single component or to reduce the diversity loss in each generation, the variance can never be restored or held at a certain level and simply increasing the number of generations will not increase the probability of finding the optimal or even a better solution.\\
+One way to counter this diversity loss is to increase the population size, by checking and correcting the populaton if uniformity in a component is reached or by using the Laplace correction. This paper will use a different approach by adjusting the distribution vector according to the population and selection size.
 
 \section{Abstract}
 
-Using the same general class of EDAs as \cite{Shapiro} (probability model is build using only data sampled from the last generation), the result that the diversity loss of sampling \(\tilde{n}\) individuals from a population is \(1 - \frac{1}{\tilde{n}}\) and the calculated result of diversity loss (\(1 - \frac{1}{n}\)) of generating a population with \(n\) individuals from a distribution vector \(p\) we come to the conclusion that by changing the distribution vector \(p\) accordingly to the population size \(n\) and the number of selected individuals \(\tilde{n}\), we can reduce the diversity loss. This is true for a flat landscape and tests have shown that while this correction does not outperform a standard Laplace correction in terms of population diversity it works very well for actual non-flat problem like OneMax.\\
-The resulting method is to correct \(p\) to \(\frac{1}{2}(1 - \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) for \(p < \frac{1}{2}(1 - \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\), to \(\frac{1}{2}(1 + \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) for \(p > \frac{1}{2}(1 + \sqrt(\frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}))\) and to \(\frac{1}{2}\) else.\\
+In \cite{Shapiro} it was shown that the factor of diversity loss of sampling \(N\) individuals from a population of the size \(M\) and generating a new population of the size \(M\) is \(1 - \frac{1}{N}\) and that this is true for a whole class of EDAs (SML-EDAs, probability model is build using only data sampled from the last generation). In this paper it will be shown that the factor of diversity loss of randomly generating a new population of the size \(M\) on the basis of a distribution vector \(p\) is \(1 - \frac{1}{M}\). Using both results we can calculate a new \(p\) (on basis of the population size \(M\), the sampling size \(N\) and the old distribution vector) with which the diversity loss is lower and that the diversity loss can be reverted with the factor \(x = \frac{N(M-1)}{M(N-1)}\). It will be demonstrated that this method which will be called {\bf Corrected Distribution} outperforms the standard Laplace correction in problems like OneMax. In addition it will be shown that instead of randomly creating a new generation by applying the distribution vector \(p\) on each single component of all individuals of the population, distributing exactly \(p M\) '1's in the population will result in a total loss of variance of only \(\frac{N-1}{N}\) and that this loss can be corrected in the same manner as with Corrected Distribution with the factor \(x = \frac{N}{N-1}\). This method will be called {\bf Exact Distribution Correction} and significantly outperforms other correction methods at the cost of a slower convergence. The resulting method corrects \(p\) to \(\frac{1}{2}(1 - \sqrt(x)\) for \(p < \frac{1}{2}(1 - \sqrt(\frac{1}{x}))\), to \(\frac{1}{2}(1 + \sqrt(x))\) for \(p > \frac{1}{2}(1 + \sqrt(\frac{1}{x})\) and to \(\frac{1}{2}\) otherwise.\\
 
 \newpage
 \section{Definitions}
@@ -56,35 +109,52 @@ The resulting method is to correct \(p\) to \(\frac{1}{2}(1 - \sqrt(\frac{(\tild
 The diversity of a given population can be measured by the 'trace of the empirical co-variance matrix'.\\
 Let
 \begin{itemize}
+\addtolength{\itemsep}{-0.5\baselineskip}
 \item \(C\): number of components of each individual\\
-\item \(n\): number of individuals in the population\\
-\item \(\tilde{n}\): number of selected individuals\\
+\item \(N\): size of the population\\
+\item \(n\): number of selected individuals\\
 \item \(A\): set of different values a component can take\\
 \item \(|A|\): number of different values a component can take\\
+\item \(x^{\mu}_{i}\): value of component i of individual \(\mu\)\\
+\item \(\varphi(x)\): '1' if the condition x is met, '0' otherwise\\
 \end{itemize}
 
+
+
+\(v^{a}_{i}\) describes the ratio of a certain value of a component in the population. E.g. \(v^{0}_2 = 0.3\) means that 30\% of all the individuals in the population have a '0' in the second component. 
 \begin{equation}
-x^{\mu}_{i} \text{: component i of individual \(\mu\)}
+v^{a}_{i} = \frac{1}{N} \sum_{\mu=1}^{N} \varphi(x^{\mu}_{i} = a)
 \end{equation}
 
+\(v_{i}\) denotes the average variance of all values of a certain value of a component in the population.
 \begin{equation}
-v^{a}_{i} = \frac{1}{n} \sum_{\mu=1}^{n} \varphi(x^{\mu}_{i} = a)
+v_{i} = \frac{1}{|A|} \sum_{a=0}^{|A|-1} v^{a}_{i} (1 - v^{a}_{i})
 \end{equation}
 
+\(v\) denotes the sum of the average variances of all values of the values in all components in the population.
 \begin{equation}
+\label{eq:variance1}
 v = \frac{1}{|A|} \sum_{i=1}^{C} \sum_{a=0}^{|A|-1} v^{a}_{i} (1 - v^{a}_{i})
 \end{equation}
 
-Our goal is to determine the resulting diversity of a population created on a given distribution \(p\), so we have to calculate all possible combinations of individuals in that populations of the size \(n\). For simplicity we are looking at strings of the size 1, i.e. \(C = 1\), in the case of UMDAs on a flat landscape the results for \(C > 1\) are the same, see chapter X.
-
-To create a population with the distribution p each individual has in its component with the probability \(p\) a '1' (or with the probability \((1-p)\) a '0'). Creating a population with the size of \(n\) with \(|A|\) different values in each component we then have a combination with repetition, i.e. there would be
 
 %TODO ueberhaupt relevant?
-\begin{equation}
-\frac{(|A|+n-1)!}{n!(|A|-1)!} = {|A|+n-1 \choose n}
-\end{equation}
-possible different population. For example for \(|A|=2\) there would be \(n+1\) different populations (...000, ...001, ...011, ...111, ...) as the position of an individual in the population is not important. In this paper I will only look into the case of \(|A| = 2\), i.e. bitsrings. The main difference with \(|A|>2\) compared to \(|A|=2\) is that the probability for a certain population is different and that we no longer can identify a certain population with a 'k', with \(k\) being the number of '1's.
 
+The scope of this paper is to apply Univariate Marginal Distribution Algorithms ({\bf UMDA}s) on problems with a flat fitness landscape and other problems where the components are not interconnected (e.g. OneMax). Therefore we can examine the variance of each component independently, i.e. set \(C = 1\).\\
+TODO
+
+Creating a population with the size of \(M\) with \(|A|\) different values in each component we then have a combination with repetition, i.e. there would be
+\[
+\frac{(|A|+M-1)!}{M!(|A|-1)!} = {|A|+M-1 \choose M}
+\]
+
+possible different population. For example for \(|A|=2\) there would be \(M+1\) different populations (...000, ...001, ...011, ...111, ...) as the position of an individual in the population is not important. Although there are implementations of UMDA with \(|A| > 2\) (see \cite{Unknown1}) we will only look into the case of \(|A| = 2\), i.e. our UMDAs are represented as bit-strings.\\
+
+% TODO Ablauf von UMDA
+With UMDAs we determine in each step the ratio of '1' for each component of the selected part of the population and calculate the ratio. In the literature (see \cite{Muehlbein}) this is usually called \(p_{i}\) and it is equal to our definition of \(v^{a=1}_{i}\), so we set \(p_{i} := v^{1}_{i}\). The distribution vector is called \(p := {p_{1}, p_{2}, ..., p_{C}}\).\\
+From this distribution vector \(p\) a new population of the size \(M\) is generated where each individual has a '1' in its \(i\)th component with the probability \(p_{i}\) (or likewise a '0' with the probability \((1 - p_{i})\)). The distribution vector of the next generation will be called \(p_{t+1}\) and this way of creating a new generation will be called {\bf Random Distribution}.
+
+%Our goal is to determine the resulting diversity of a population created on a given distribution \(p\), so we have to calculate all possible combinations of individuals in that populations of the size \(n\). For simplicity we are looking at strings of the size 1, i.e. \(C = 1\), in the case of UMDAs on a flat landscape the results for \(C > 1\) are the same, see chapter X.
 
 %---------
 
@@ -94,267 +164,604 @@ possible different population. For example for \(|A|=2\) there would be \(n+1\) 
 
 %There are two ways to create a population with \(|A| > 2\). We can either assign a probability \(p\) to each component and value and then using a roullette wheel to randomly select a resulting 
 
-
-
-The probability for a certain population is 
+The probability for \(p_{t+1;i} = \frac{k_{i}}{M}\), i.e. the probability for generating a population with \(k_{i}\) '1's in the \(i\)th component on the basis of a given distribution vector \(p\), is
 \begin{equation}
-p_k = p^k (1 - p)^{n - k} {n \choose k}
-\end{equation}
-with \(k\) being the number of '1's.
-
-We further define a \(v_k\) which represents the diversity for a population with \(k\) '1's.
-The \(v^{a}_i\) values of a \(v_k\) with a given \(k\) is then:
-\begin{equation}
-v^{a}_i(k) = \frac{1}{n} \sum_{\mu=1}^{n} \varphi(x^{\mu}_i(k) = a)
+\label{eq:probabilityk}
+P(p_{t+1;i} = \frac{k_{i}}{M}) = p^{k_{i}}_{t;i} (1 - p_{t;i})^{M - k_{i}} {M \choose k_{i}}
 \end{equation}
 
-As we have defined \(k\) as the number of '1's and set \(C = 1\) the sum over all \(\varphi(x^{\mu}_i = 1)\) is \(k\) (and the sum over all \(\varphi(x^{\mu}_i = 0)\) is \(n-k\)) and our \(v^{a}_1\) (we only need the \(v^{a}_1\)s because we only have one component, i.e. \(C = 1\)) is:
+As defined above, \(v\) denotes the sum of the average variances of all values of all components in the population. With \(|A| = 2\) and with \(k = {k_{1}, k_{2}, ..., k_{C}}\), with \(k_{i}\) denoting the number of '1's in the \(i\)th component, we get for equation~\ref{eq:variance1}:
 \[
-v^{0}_1 = \frac{n-k}{n}
-\]
-\[
-v^{1}_1 = \frac{k}{n}
+v_{k} = \frac{1}{2} \sum_{i=1}^{C} \sum_{a=0}^{1} v^{a}_i (1 - v^{a}_i)
 \]
 
-We define the diversity of a given population (with \(k\) '1's) as
+For a given \(k\) we can calculate the \(v^{a}_i\)'s 
+\[
+v^{a=0}_{i} = \frac{M - k_{i}}{M}
+\]
+\[
+v^{a=1}_{i} = \frac{k_{i}}{M}
+\]
+This is true because \(\sum_{\mu=1}^{M} \varphi(x^{\mu}_i = 1) = k\) and \(\sum_{\mu=1}^{M} \varphi(x^{\mu}_i = 0) = (M - k)\).\\
+
+So we get:
+
+\[
+v_k = \frac{1}{2} \sum_{i=1}^{C} \sum_{a=0}^{1} v^{a}_i (1 - v^{a}_i) = \frac{1}{2} \sum_{i=1}^{C} [v^{0}_i (1-v^{0}_i) + v^{1}_i (1 - v^{1}_i)] =
+\]
+\[
+      \frac{1}{2} \sum_{i=1}^{C} [\frac{M - k_i}{M} (1 - \frac{M-k_i}{M}) + \frac{k_i}{M} (1 - \frac{k_i}{M})] = {\bf \sum_{i=1}^C \frac{k_i M - k^{2}_{i}}{M^{2}}}
+\]
+And
 \begin{equation}
-v_k = \frac{1}{2} \sum_{i=1}^{C} \sum_{a=0}^{|A| - 1} v^{a}_i (1 - v^{a}_i)
+\label{eq:variance2}
+	v_{k_{i}} = \frac{k_i M - k^{2}_{i}}{M^{2}}
 \end{equation}
 
-In our case, with bits (\(|A| = 2\)) and one component (\(C = 1\)), we get the following:
-\[
-v_k = \frac{1}{2} \sum_{i=1}^{1} \sum_{a=0}^{1} v^{a}_i (1 - v^{a}_i) = 
-\]
-\[
-      \frac{1}{2} [v^{0}_1(1-v^{0}_1) + v^{1}_1(1 - v^{1}_1)] =
-\]
-\[
-      \frac{1}{2} [\frac{n-k}{n} (1 - \frac{n-k}{n}) + \frac{k}{n} (1 - \frac{k}{n})] = 
-\]
-%% \[
-%%      \frac{1}{2} (\frac{n-k}{n} - \frac{(n-k)^{2}}{n^{2}} + \frac{k}{n} - \frac{k^{2}}{n^{2}}) = 
-%% ]
-\[
-      \frac{kn - k^{2}}{n^{2}}
-\]
-
-Our total diversity \(d_p\) for a given distribution p is
+Now we have on the one side the probability for the generation of a population with a certain \(k\) and a given \(p\) (equation~\ref{eq:probabilityk}) and the variance of such a population (equation~\ref{eq:variance2}). The expected variance \(d_p\) of the whole population on the basis of \(p\) and \(M\) is therefore the sum over all products of the variance and the probability of all values of \(k_{i}\):
 \begin{equation}
-d_p = \sum_{k=0}^{n} v_k p_k
+\label{eq:totalv}
+d_p = \sum_{i=1}^C \sum_{k_{i}=0}^{M} v_{k_{i}} P(p_{t+1;i} = \frac{k_{i}}{M}) = 
+\sum_{i=1}^C \sum_{k_{i}=0}^{M} \frac{k_i M - k^{2}_{i}}{M^{2}} p^{k_{i}}_{i} (1 - p_{i})^{M - k_{i}} {M \choose k_{i}}
 \end{equation}
 
-What we want is to have a diversity of \(p (1 - p)\), exactly the variance of a population of infinite size. What we get is somewhat different. To determine by which factor our result differs from the wanted result, we divide our \(d_p\) by \(p(1-p)\):
-\[
-\frac{d_p}{p(1-p)} = \sum_{k=0}^{n} \frac{kn - k^{2}}{n^{2}} p^{k} (1-p)^{n-k} {n \choose k} = 
-\]
-\[
-\frac{1}{n^{2} p(1-p)} \sum_{k=0}^{n} k (n-k) p^{k} (1-p)^{n-k} {n \choose k} =
-\]
-\[
-\frac{1}{n^{2}} \sum_{k=1}^{n} k (n-k) p^{k-1} (1-p)^{n-k-1} {n \choose k}
-\]
 
-It can be shown that this can be reduced further. The exact prove will be given elsewhere, here is just the observed result:
+
+
+
+
+
+
+
+\newpage
+\section{Preventing variance loss with Distribution Correction (DC)}
+
+In the scope of this paper (UMDAs) each component is independent, so we can examine each single component on its own and set \(C = 1\) (and \(k = k_{i=1}\) and \(p = p_{i=1}\) for simplicity). 
+
+\begin{figure}[H]
+\setbox0\vbox{\small
+\begin{enumerate}
+\item Population of the previous generation $\Rightarrow$Variance \(v_{t}\)\\
+\item Select \(N\) individuals and calculate \(p\)\\
+\item Generate new population of size \(M\) on basis of \(p\) $\Rightarrow$ Variance \(v_{t+1} = (1-\frac{1}{N})v_{t}\)\\
+\item Done, we have created a new generation\\
+\end{enumerate}
+}
+\centerline{\fbox{\box0}}
+\end{figure}
+
+From \cite{Shapiro} we know that the variance loss of the three steps (from I to IV) is \(1 - \frac{1}{N}\), i.e. (with \(v_{t}\) denoting the variance of the population of the last generation from which we have selected \(N\) individuals and \(v_{t+1}\) denoting the variance of the current population)
+
 \begin{equation}
-d = d_p = 1 - \frac{1}{n}
+v_{t+1} = (1-\frac{1}{N})v_{t}
 \end{equation}
-So it is independent from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
-%% The formula will be generalized in chapter 3. TODO
 
-According to Shapiro \cite{Shapiro} we also know that selecting l individuals from this population of size n will result in a diversity loss (compared to \(p(1-p)\)) of the same factor \(1 - \frac{1}{n}\).
 
-To recap:\\
-We have a distribution \(p\) and we generate a new population of the size \(n\). In the optimal case \((n = \inf)\) we get the expected variance of \(p(1-p)\). We calculated that the real variance is \(p(1-p)(1 - \frac{1}{n})\) and we know that creating a new population and selecting \(\tilde{n}\) individuals from that population (in a flat fitness landscape) will result in the variance \(p(1-p)(1 - \frac{1}{\tilde{n}})\).
 
-Now, the idea is to not create the new population with \(p\) but with a distribution \(q\) that fulfills the equation 
+
+\subsection{Variance loss}
+
+When generating a new population on basis of \(p\) we learned last section (equation~\ref{eq:totalv}) that the total variance of the population is \(d_{p}\). But the variance that we want is \(p ( 1 - p )\), i.e. the variance of a population of infinite size generated on basis of \(p\) and no variance loss.\\ The factor of variance loss from step (III) to (IV) is \(\frac{d_p}{p(1-p)}\). Using for example the math program Maple this can be simplified to:
 \begin{equation}
-p(1-p)=xq(1-q) 
-\end{equation}
-
-with \(x\) fulfilling the equation:
-
-\begin{equation}
-1 - \frac{1}{\tilde{n}} = x( 1 - \frac{1}{n} ) \Leftrightarrow 
-x = \frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}
+\label{eq:dcorrection}
+\frac{d_p}{p(1-p)} = \frac{1}{p(1-p)} \sum_{k=0}^{M} \frac{k M - k^{2}}{M^{2}} p^{k} (1-p)^{M - k} {M \choose k} = {\bf 1 - \frac{1}{M}}
 \end{equation}
 
 So we have:
+\begin{itemize}
+\addtolength{\itemsep}{-0.5\baselineskip}
+\item Factor of variance loss from step (III) to (IV) : \(1 - \frac{1}{M}\) (from (\ref{eq:dcorrection})\\
+\item Factor of Variance loss from step (II) to (IV) : \(1 - \frac{1}{N}\) (from \cite{Shapiro})\\
+\end{itemize}
+
+Our factor \(y\) of variance loss from step (II) to (III) is: 
+\begin{equation}
+\label{eq:y}
+1 - \frac{1}{N} = y \frac{d_p}{p(1-p)} \Leftrightarrow y = \frac{1 - \frac{1}{N}}{\frac{d_p}{p(1-p)}}
+\end{equation}
+
+With equation~(\ref{eq:dcorrection}) we get \(y = \frac{1 - \frac{1}{N}}{1 - \frac{1}{M}} = \frac{M(N-1)}{N(M-1)}\).\\
+
+\subsection{Distribution vector correction}
+
+If we use a different distribution vector \(q\) to generate the population and set \(q(1-q)\) (or \(q\) accordingly) in a way so that the theoretical factor of variance loss factor is 1 (i.e. no variance loss) we will reduce the overall variance loss. As our variance loss is \(y = \frac{M(N-1)}{N(M-1)}\) we have to multiply with the reciprocal value in order to nullify the variance loss and multiply that factor with our original \(p(1-p)\) variance. We are allowed to do that because the variance loss itself does not depend on the distribution vector we use:
+
+\begin{equation}
+x = \frac{1}{y} = \frac{N(M-1)}{M(N-1)}
+\end{equation}
+
+\begin{equation}
+\label{eq:qpx}
+q(1-q) = p(1-p) x \Leftrightarrow -q^2 + q - (-p^2 + p) x = 0 \Leftrightarrow q_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) x})
+\end{equation}
+
+
+For example with \(M = 2N\) (i.e. we select half of the population to generate a new distribution vector) we get
 \[
-p(1-p) = q(1-q) \frac{(\tilde{n}-1)n}{(n-1)\tilde{n}} \Leftrightarrow
+q_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{N(2N-1)}{2N(N-1)}}) = 
 \]
 \[
--q^2 + q - (-p^2 + p) \frac{(n-1)\tilde{n}}{(\tilde{n}-1)n} = 0 \Leftrightarrow
-\]
-\[
-q_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(n-1)\tilde{n}}{(\tilde{n}-1)n}})
+\frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{2N-1}{2N-2}})
 \]
 
-For the case of \(\tilde{n} = \frac{n}{2}\) (i.e. we select half of the population to generate a new distribution vector) we would get
+For \(1 - 4 (-p^2 + p) \frac{N(M-1)}{M(N-1)} < 0\) we get a negative value in square root. The border values for p are:
 \[
-q_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(\tilde{n}-1)2\tilde{n}}{(2\tilde{n}-1)\tilde{n}}}) = 
+1 - 4 (-p^2 + p) \frac{N(M-1)}{M(N-1)} = 0 \Leftrightarrow
 \]
 \[
-\frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{2\tilde{n}-2}{2\tilde{n}-1}})
+p_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - \frac{M(N-1)}{N(M-1)}})
 \]
+\\
+\begin{wrapfigure}{r}[0cm]{5.5cm}
+%%\begin{figure}[H]
+\includegraphics[scale=0.4]{graph_DC_correction.eps}
+\caption{\label{correction_1}}
+%% Graphs of the distribution correction function}
+%%\end{figure}
+\end{wrapfigure}
 
-For \(1 - 4 (-p^2 + p) \frac{(n-1)\tilde{n}}{(\tilde{n}-1)n} < 0\) we get a negative value in square root. The border values for p are:
-\[
-1 - 4 (-p^2 + p) \frac{(n - 1)\tilde{n}}{(\tilde{n} - 1)n} = 0 \Leftrightarrow
-\]
-\[
-p_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - \frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}})
-\]
-So if our \(p\) is within \(p_{1}\) and \(p_{2}\)
-\[
-\frac{1}{2} (1 - \sqrt{1 - \frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}}) < p < \frac{1}{2} (1 + \sqrt{1 - \frac{(\tilde{n}-1)n}{(n-1)\tilde{n}}})
-\]
-we cannot increase the variance any further and have to set \(q = 0.5\).
+In figure \ref{correction_1} you can see the graph of the correction function for a set of values for \(n\) (with population size \(n = 2N\)) ranging from \(4\) (farthest on the left and right) to \(200\) (nearest to \(f(p) = p\)).\\
 
-\begin{figure}[h]
-\includegraphics[scale=0.5]{graph.png}
-\caption{
-For a set of values for \(n\) (with \(n = 2\tilde{n}\)) ranging from \(4\) (farthest on the left and right) to \(200\) (nearest to \(f(p) = p\))}
-\end{figure}
+If our \(p\) is within \(p_{1}\) and \(p_{2}\)
+\[
+\frac{1}{2} (1 - \sqrt{1 - \frac{M(N-1)}{N(M-1)}}) < p < \frac{1}{2} (1 + \sqrt{1 - \frac{M(N-1)}{N(M-1)}})
+\]
+we will have to substitute with an appropriate value. As the function approaches \(0.5\) both from the top and from the bottom we will substitute with \(q = 0.5\) if our \(p\) is within those borders. This method will be called {\bf Distribution Correction (DC)}
+
 
 \newpage
 \section{Code}
-Finally we can put our results into a code (\(N = \tilde{n}\)):\\
+Finally we can put our results into a code (\(M = 2N\)):\\
 
 \begin{verbatim}
-if( p < 0.5*(1 - sqrt( (2*N-2) / (2*N-1) )) )
-    q = 0.5 * (1 - sqrt( 4*p*(1-p) * (2*N-1) / (2*N-2) ) );
+if( p < 0.5 * (1 - sqrt( (2*N-2) / (2*N-1) )) )
+    q = 0.5 * (1 - sqrt( (2*N-1) / (2*N-2) * 4*p*(1-p) ) );
 else
-if( p > 0.5*(1 + sqrt( (2*N-2) / (2*N-1) )) )
-    q = 0.5 * (1 + sqrt( 4*p*(1-p) * (2*N-1) / (2*N-2) ) );
+if( p > 0.5 * (1 + sqrt( (2*N-2) / (2*N-1) )) )
+    q = 0.5 * (1 + sqrt( (2*N-1) / (2*N-2) * 4*p*(1-p) ) );
 else
     q = 0.5;
 \end{verbatim}
 
-or for the general formula with \(n \neq 2\tilde{n}\) (\(M = n, N = \tilde{n}\)):\\
+or for random values of population size \(M\) and sampling size \(N\):\\
          
 \begin{verbatim}
-if( p < 0.5 * (1 - sqrt( ((N-1)*M) / ((M-1)*N) ) ) )
-    q = 0.5 * (1 - sqrt( 4*p*(1-p) * ((M-1)*N) / ((N-1)*M) ) );
+if( p < 0.5 * (1 - sqrt( (M*(N-1)) / (N*(M-1)) ) ) )
+    q = 0.5 * (1 - sqrt( (N*(M-1)) / (M*(N-1)) * 4*p*(1-p) ) );
 else 
-if( p > 0.5 * (1 + sqrt( ((N-1)*M) / ((M-1)*N) ) ) )
-    q = 0.5 * (1 + sqrt( 4*p*(1-p) * ((M-1)*N) / ((N-1)*M) ) );
+if( p > 0.5 * (1 + sqrt( (M*(N-1)) / (N*(M-1)) ) ) )
+    q = 0.5 * (1 + sqrt( (N*(M-1)) / (M*(N-1)) * 4*p*(1-p) ) );
 else
     q = 0.5;
 \end{verbatim}
 
-The main advantage of this code is that only minimal changes to the code have to be made because this way of reducing the diversity loss is problem independent (at least for bitstrings on a flat landscape in UDMA). The code has to be inserted just after determining the distribution \(p\).
-
-
-\section{Multiple components}
-
-If we set \(C > 1\), i.e. bitstrings longer than one bit, we will get similar results. While equation \(3\) does use \(C\) to determine the diversity of a generated population we can look at each component seperately as they are not connected in UMDA (in a flat fitness landscape). All bits belonging to one component in the population are created with an own distribution \(p\) that is independent from the other \(p\). Therefor we can handle a problem with \(C > 1\) like \(C\) seperate problems, each with one component.
-How interconnected components would affect the diversity is out of the scope of this paper and remains to be investigated.
-
+It is easy to implement the code piece within an existing application as it is problem independent (within the restrictions described above, bit-strings on a flat landscape in UMDA). The code itself has to be inserted just after determining the distribution \(p\) from the selected part of the population of the size \(N\).
 
 \newpage
-\section{Tests}
 
-\subsection{General test configuration}
+\section{Exact Distribution}
 
-For both tests, OneMax and Flat fitness landscape, 50 seperate were repeatedly (with varying parameters) made.\\
-6 different algorithms were tested:
+We have calculated that the variance loss of generating a population on basis of \(p\) randomly will result in a variance loss of \(1 - \frac{1}{M}\). In order to create a new generation we originally set each value of each component of an individual of the new population to '1' with the probability of \(p\) (or to '0' with the probability of \(1-p\)). \\
+A different approach is to create the new generation by distributing exactly \(p M\) '1's (or \((1-p) M\) '0's) within the array of components in the population so that the new variance is exactly \(p (1 - p)\), i.e. there is no variance loss in that step. We will call this {\bf Exact Random Distribution}. In the following sections we will show that we will get a lower variance loss using this method.
 
-\begin{itemize}
-\item {\bf No correction}: The new distribution \(p\) for each component is simply calculated by dividing the number of 1's by the sample size
-\item {\bf No correction + bounded}: Same as (1) but in the case \(p\) gets above \(1 - \frac{1}{\tilde{n}}\) or below \(\frac{1}{\tilde{n}}\) it is corrected to these boundaries
-\item {\bf Laplace correction}: The new \(p\) is calculated by \(\frac{k + 1}{\tilde{n} + 2}\)
-\item {\bf Corrected distribution}: Same as (1), but the resulting \(p\) is corrected with the formula discussed in the previous section
-\item {\bf Corrected distribution + bounded}: Same as (2) but with the correction of \(p\) before checking the boundaries
-\item {\bf Corrected distribution + Laplace}: Same as (3) but with the correction of \(p\) afterwards
-\end{itemize}
+\[
+p = \frac{k_{old}}{N}
+k_{new} = \lfloor p M \rfloor = \lfloor \frac{k_{old} M}{N} \rfloor
+\]
 
-Using the for each component newly calculated distribution \(p\) we generate the new population of the size \(n\) depending on our parameter called 'Exact Random Distribution'. If it is not set we create each member of the population individually, if it is set we distribute \(pn\) '1' and \((1-p)n\) '0' between the individuals.\\
-Tests have shown that the variance of the runs themselves are of no significance so it is are not included in the graphs.\\
-The graphs were created with the help of gnuplot and C++, the actual program will be availble with a later version of this paper on CD-ROM.\\
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_exact_distribution_fitness.eps}
+\caption{\label{onemax_exact_distribution_1} Comparison between Exact Random Distribution and Random Distribution}
+\end{figure}
 
-\subsection{Flat fitness landscape}
+\subsection{Rounding errors}
 
-In this test we examine the behaviour of the algorithms in terms of their diversity with varying parameters on a flat fitness landscape. It is basicly a 'needle in a haystack' problem where the needle is not found within the 200 generations, i.e. all solutions have the same fitness. The problem size is a bitstring with length 10, i.e. we have 10 components.\\
+Rounding errors are a big problem as with iterative algorithms like EDAs they will multiply over time. If an algorithm is for example biased towards '1' it will do great in a simple OneMax test but fail miserably in a 'ZeroMax' test.\\
+When we analyze this option within our framework that we have set in the last two sections we see that a rounding error occurs when \(p M\) is no whole number. When we simply calculate \(p\) by counting the number of '1's in the selected part of the population of size \(N\) such a rounding error will only occur if \(M\) is no multiple of \(N\).\\
+No problem here, but this becomes an issue if we try to combine for example the {\bf Laplace correction} or the {\bf distribution correction} with Exact Distribution, because those methods change \(p\) before we distribute \(p M\) '1's within our population and that new \(p M\) is not necessarily a whole number, no matter whether \(M\) is a multiple of \(N\) or not.\\
+Thus, when using Exact distribution, we can demand that \(\lfloor p M \rfloor = p M\), round the number to the nearest whole number or, depending on the remainder, randomly decide whether to add another '1' (e.g. for \(p = 0.71\) and \(M = 10\) we would distribute seven '1's and an eighth '1' with the probability of \(0.1\)). 
+The drawback for the latter two methods is that the distribution no longer deserves the title 'exact' although we still get a lower variance loss.
+
+\subsection{Exact Distribution Correction}
+
+In the second (???) chapter we have discussed how to reduce the variance loss in the case we create the population without exact random distribution. When using an Exact Distribution the diversity loss \(d_p\) is different and we cannot use the same Diversity Correction method as before so we have to adapt the equations to the new situation. In equation~(\ref{eq:probabilityk}) the probability for \(\tilde{p_{i}} = \frac{k_{i}}{M}\) obviously changes as there are always exactly \([p M] + (p M-[p*M])\) '1's in the population, i.e. 
+TODO
+\[
+\dot{P}_(\tilde{p_{i}} = \frac{k_{i}}{M}) = \left\{
+\begin{array}{l l}
+1 & \quad \mbox{for \(k_{i} = p_{i}M\)}\\
+0 & \quad \mbox{for \(k_{i} \neq p_{i}M\)}\\
+\end{array}
+\right.
+\]
+
+The other equations about our variance \(v_{k_{i}}\) remain the same as they are dependent on our \(k_{i}\) anyways. Changes have to be made to equation~(\ref{eq:totalv}) because our \(P\tilde{p_{i}} = \frac{k_{i}}{M})\) has changed. We no longer sum over all possible values of \(k\) as only value (\(k = p M\)) has the probability '1' and all other summands the probability '0':
+
+\begin{equation}
+\dot{d}_p = \sum_{i=1}^C  v_{k_{i} = p_{i} M} P(\tilde{p_{i}} = \frac{k_{i} = p_{i}M}{M}) = 
+\sum_{i=1}^C  v_{p_{i} M} \cdot 1 =\\
+\sum_{i=1}^C \frac{p_{i} M^{2} - (p_{i} M)^{2}}{M^{2}} = 
+\sum_{i=1}^C p_{i} (1 - p_{i})
+\end{equation}
+
+
+\begin{wrapfigure}{r}[0cm]{5.5cm}
+%%\begin{figure}[H]
+\includegraphics[scale=0.4]{graph_EC_correction.eps}
+\caption{\label{correction_1}}
+%% Graphs of the exact distribution correction function}
+%%\end{figure}
+\end{wrapfigure}
+
+As expected we have no loss of variance from step (III) to step (IV) using Exact Random Distribution because \(\frac{\dot{d}_p}{p(1-p)} = 1\) and we get in an analogous manner the factor of variance loss from step (II) to (III) with \(y = 1 - \frac{1}{N}\) and \(x = \frac{1}{1 - \frac{1}{N}} = \frac{N}{N-1}\).\\
+The problem is that we cannot easily insert that into equation~(\ref{eq:qpx}) and use the new distribution vector to generate the new population because we have demanded that \(p M\) (with \(p\) being the distribution vector with which we create the new generation) is a whole number. If we change the distribution vector we probably do have a rounding error which we did not include in our calculation. We will look into that a little closer in the next chapter, for now we will accept that there is a small error in our calculation and look if the algorithm still does well in the tests.\\
+Inserting our \(x\) into equation~(\ref{eq:qpx}) we will get \(q(1-q) = p(1-p) \frac{N}{N-1}\) and we have
+
+\[
+\dot{q}(1-\dot{q}) = p(1-p) \frac{N}{N-1} \Leftrightarrow
+\]
+\[
+-\dot{q}^2 + \dot{q} - (-p^2 + p) \frac{N}{N-1} = 0 \Leftrightarrow
+\]
+\[
+\dot{q}_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{N}{N-1}})
+\]
+
+For \(1 - 4 (-p^2 + p) \frac{N}{N-1} < 0\) we get a negative value in square root. The border values for p are:
+\[
+1 - 4 (-p^2 + p) \frac{N}{N-1} = 0 \Leftrightarrow
+\]
+\[
+p_{1/2} = \frac{1}{2} (1 \pm \sqrt{1 - \frac{N-1}{N}})
+\]
+
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_comparison_fitness.eps}
+\caption{\label{onemax_comparison_exact_1}As expected, Exact random distribution with correction is the best TODO}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_flat_diversity_exact_correction.eps}
+\caption{\label{flat_comparison_exact_1}TODO}
+\end{figure}
+
+
+This method will be called {\bf Exact Distribution Correction}. Compared 
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_leading_exact_distribution_diversity0.eps}
+\includegraphics[scale=0.35]{graph_leading_exact_distribution_fitness0.eps}
+\caption{\label{flat_comparison_exact_2}TODO}
+\end{figure}
+
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_leading_exact_distribution_diversity1.eps}
+\includegraphics[scale=0.35]{graph_leading_exact_distribution_fitness1.eps}
+\caption{\label{flat_comparison_exact_3}TODO}
+\end{figure}
+
+
+\subsection{Real Exact Distribution Correction}
+
+As discussed in the previous section we cannot demand that our \(p*M\) is a whole number while changing the \(p\) with the Exact Distribution Correction discussed there. Using the second method mentioned in the Rounding Errors section (randomly decide whether to generate one additional '1') in equation~(\ref{eq:probabilityk}) the probability for \(\tilde{p_{i}} = \frac{k_{i}}{M}\) obviously changes as there are \(\lfloor p M \rfloor\) '1's with the probability \(1-(p M - \lfloor p M \rfloor)\) and \(\lfloor p M \rfloor+1\) '1's with the probability \(p M - \lfloor p M \rfloor\):
+
+\[
+\dot{P}_(\tilde{p_{i}} = \frac{k_{i}}{M}) = \left\{
+\begin{array}{l l}
+1-(p M-\lfloor p M \rfloor) & \quad \mbox{for \(k_{i} = \lfloor p_{i} M \rfloor\)}\\
+p M-\lfloor p M \rfloor & \quad \mbox{for \(k_{i} = \lfloor p_{i} M \rfloor+1\)}\\
+0 & \quad \mbox{else}\\
+\end{array}
+\right.
+\]
+
+The other equations about our variance \(v_{k_{i}}\) remain the same as they are dependent on our \(k_{i}\) anyways. Changes have to be made to equation~(\ref{eq:totalv}) because our \(P\tilde{p_{i}} = \frac{k_{i}}{M})\) has changed and we no longer sum over all possible values of \(k\) but only two:
+
+\[
+\dot{d}_p = \sum_{i=1}^C  \sum_{k_{i}=0}^{M} v_{k_{i}} P(\tilde{p_{i}} = \frac{k_{i}}{M}) = 
+\]
+\[
+            \sum_{i=1}^C                     v_{k_{i} = \lfloor p_{i} M \rfloor}   P(\tilde{p_{i}} = \frac{k_{i} = \lfloor p_{i} M \rfloor}{M}) +
+                                             v_{k_{i} = \lfloor p_{i} M \rfloor+1} P(\tilde{p_{i}} = \frac{k_{i} = \lfloor p_{i} M \rfloor+1}{M}) =
+\]
+\[
+            \sum_{i=1}^C                     v_{\lfloor p_{i} M \rfloor}   (1-(p M-\lfloor p M \rfloor))
+                                             v_{\lfloor p_{i} M \rfloor+1}    (p M-\lfloor p M \rfloor) =
+\]
+\[
+	    \sum_{i=1}^C  \frac{\lfloor p_{i} M \rfloor M - \lfloor p_{i} M \rfloor^{2}}{M^{2}} (1-(p M-\lfloor p M \rfloor)) +
+			  \frac{(\lfloor p_{i} M \rfloor+1) M - (\lfloor p_{i} M \rfloor+1)^{2}}{M^{2}} (p M-\lfloor p M \rfloor) =
+\]
+\[
+	    \sum_{i=1}^C  \frac{
+				(\lfloor p_{i} M \rfloor)^2 - 2 \lfloor p_{i} M \rfloor p M + p M^{2} - p M + \lfloor p M \rfloor}
+				{M^{2}
+			       }
+\]
+
+Our variance loss is as before \(\frac{\dot{d}_p}{p (1-p)}\) which unfortunately cannot simplified any further and therefore is dependent on \(p\) TODO. With equation~(\ref{eq:y}) we have \(y = \frac{1 - \frac{1}{N}}{\frac{\dot{d}_p}{p (1-p)}}\) and \(x = \frac{1}{y} = \frac{\frac{\dot{d}_p}{p (1-p)}}{1 - \frac{1}{N}}\).
+The problem is that we cannot easily insert that into equation~(\ref{eq:qpx}) as in this case our \(x\) depends on the distribution vector with which we create the new population. So we really have to make \(x\) dependent on the distribution vector \(\dot{q}\):
+
+\[
+\dot{q}(1-\dot{q}) = p(1-p) x_{\dot{q}}
+\]
+TODO
+This is kind of difficult to solve for \(\dot{q}\) and probably has to be solved numerically. This 'corrected' correction would further increase the effectiveness of the erroneous 'Exact Distribution with Random Distribution' discussed earlier on the one hand but would cost more calculation time on the other hand. Tests have to be made to determine if it is worth.
+
+
+\section{General test configuration}
+
+\subsection{Graph drawing}
+
+Because all algorithms are based on random numbers 50 separate runs were made for each parameter setting and algorithm. The data then is averaged and drawn as a graph. Normally this would result in oscillating fitness graphs as shown for example in figure (\ref{oscillating_1}). The oscillation does not bear any additional information so for the sake of clarity only the best average result that was found until that point is drawn, i.e. the graphs always have a non-negative gradient.
+
+\begin{figure}[H]
+\hspace{-0.5in}
+\includegraphics[scale=0.5]{graphs/graph_onemax1161026602/graph_onemax000_fitness.eps}
+\includegraphics[scale=0.5]{graphs/graph_onemax1161026602/graph_onemax000_diversity.eps}
+\caption{\label{oscillating_1} Oscillating fitness graphs}
+\end{figure}
+
+In figure (\ref{oscillating_1}) you can also see that {\bf Corrected Distribution (CD)} and {\bf No Correction (NC)} do not oscillate. This is simply because their variance dropped practically to \(0\) after a few generations, i.e. no component will change anymore.\\
+The graphs were created with the help of gnuplot 4.0 and g++ 4.0 (gnu C++), the actual program will be available with a later version of this paper on CD-ROM.\\
+
+\subsection{Population size}
+
+Depending on the problem type, problem size and algorithm different population sizes ranging from 10 to 100 were tested. Also for each single configuration several different population sizes were tested because the convergence speed differ between the methods. Larger populations automatically result in a larger variance and less variance loss with each step.
+TODO Variance
+
+\subsection{Problem types}
+
+\subsubsection{Flat fitness landscape}
+
+In this test we examine the behaviour of the algorithms in terms of their diversity with varying parameters on a flat fitness landscape. It is basically a 'needle in a haystack' problem where the needle is not found within the 200 generations, i.e. all solutions have the same fitness. The problem size is a bit-string with length 10, i.e. we have 10 components.\\
 The additional graph, '1 - 1/N loss / generation', denotes the theoretical loss of diversity according to \cite{Shapiro}.
 
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack000_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack001_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack002_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack003_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack004_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack005_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack006_diversity.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_haystack007_diversity.png}
-\end{figure}
+\subsubsection{OneMax problem}
 
-\newpage
-\subsection{OneMax problem}
+In this test we examine the behaviour of the algorithms in terms of their fitness with varying parameters with the problem OneMax. The main difference to a flat fitness landscape is that when selecting individuals for a new generation we do not randomly take \(N\) individuals and calculate our distribution vector \(p\) but we sort all individuals by their fitness and only look at the top 50\%.\\
+The goal is to find the string '111\dots', each '1' in a component of an individual gets rewarded by one fitness point. While the OneMax problem does not represent a problem with a real flat fitness landscape (thus the theory we discussed earlier does not apply here), a local flat fitness landscape can occur if the variance drops and/or the fitness values of the population are very similar (e.g. 010, 100, 001).\\
+In our test the problem size ranges from 100 to 500 depending on the convergence speed of the functions that we will examine.\\
 
-In this test we examine the behaviour of the algorithms in terms of their fitness with varying parameters with the problem OneMax. The goal is to find the string '111\dots', each '1' in a component of an individual gets rewarded by one fitness point. In our test the problem size if 500.\\
-For each generation only the highest fitness of each population is taken into account. Again the graph shows the average of the fitness values of all runs.\\
+%TODO
+%With the tests we have shown that our 'Corrected distribution' algorithm does significantly reduce the diversity loss compared to an algorithm with no correction. Making sure that the algorithm does not stall in a component with \(p < \frac{1}{\tilde{n}}\) or \(p > 1 - \frac{1}{\tilde{n}}\) ("bounded") makes sure that the diversity does not drop to zero in the long run. 'Corrected distribution' does not outperform 'Laplace correction' as the latter always corrects any distribution towards \(p = 0.5\).
 
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax000_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax001_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax002_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax003_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax004_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax005_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax006_fitness.png}
-\end{figure}
-\begin{figure}[htp]
-\includegraphics[scale=0.5]{graph_onemax007_fitness.png}
-\end{figure}
+\begin{wrapfigure}{r}[0cm]{6.5cm}
+%%\begin{figure}[H]
+\includegraphics[scale=0.4]{graph_onemax_fitness_landscape.eps}
+\caption{\label{fitness_landscape_onemax}\footnotesize Fitness Landscape of OneMax}
+%%\end{figure}
+\end{wrapfigure}
 
 
 
-\newpage
-\section{Conclusions}
-
-\subsection{Flat fitness landscape}
-
-With the tests we have shown that our 'Corrected distribution' algorithm does significantly reduce the diversity loss compared to an algorithm with no correction. Making sure that the algorithm does not stall in a component with \(p < \frac{1}{\tilde{n}}\) or \(p > 1 - \frac{1}{\tilde{n}}\) ("bounded") makes sure that the diversity does not drop to zero in the long run. 'Corrected distribution' does not outperform 'Laplace correction' as the latter always corrects any distribution towards \(p = 0.5\).
-
-\subsection{OneMax}
-
-While the OneMax problem does not represent a problem with a real flat fitness landscape (thus our theoretical base does not apply here), a flat fitness landscape can occur if the variance drops and/or the fitness values are very similar (e.g. 010, 100, 001).\\
+% TODO runter
 'Corrected distribution + Laplace' is clearly worse than 'Laplace correction', the changes made to the distribution \(p\) (that we determined on base of the selected individuals) are too big in order to get useful results. As expected 'Laplace correction' itself does not score well, it converges at a significant lower fitness level.\\
 'Exact random distribution' seems to generally improve the convergence of methods using not the 'Laplace correction' while being indifferent or being even worse for the 'Laplace correction' itself.\\
 At least for the case of 'OneMax' and the given parameter configuration, 'Corrected distribution' in connection with 'Exact Random Distribution' seems to outperform all other methods.
 
+\subsubsection{TwoPeak problem}
+
+\begin{wrapfigure}{r}[0cm]{6.5cm}
+\includegraphics[scale=0.4]{graph_onemax2_fitness_landscape.eps}
+\caption{\label{fitness_landscape_onemax2} Fitness landscape of OneMax with two peaks}
+\end{wrapfigure}
+
+Similar to the OneMax problem we do count the number of equal values but not only '1's but '0's, too. There are two parameters, one defines the center where we switch from counting '0's to counting '1's and one is a factor which determines how much more (or less) worth is a '1' compared to a '0'.
+
+
+%%6 different algorithms were tested: ?? TODO
+
+
+\subsubsection{Leading-1s problem}
+
+In the {\bf Leading-1s problem} the fitness is calculated by counting the number of leading '1's. This implies that contrary to OneMax the bit-position is important and the bits are connected, i.e. component \(i\)'s fitness depends on all components \(j < i\). This is more difficult to handle for UMDA algorithms discussed in this paper.\\
+For this problem keeping correct solutions on lower bit-positions is very important, i.e. lower bit-positions contribute to the total fitness more than higher bit-positions. Any algorithm that keeps up a high diversity in positions that already have the correct value will have a significantly lower fitness.
+
+\subsubsection{Plateau Problem}
+
+It is basically a OneMax problem with the difference that in a solution three neighbouring bits have to be '1' in order to get one fitness point. E.g. 100.110 would give 0 fitness points while 111.110 would give 1 fitness point.
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_plateau000_fitness.eps}
+\caption{\label{fitness_landscape_onemax2} Fitness landscape of OneMax with two peaks}
+\end{figure}
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_plateau001_fitness.eps}
+\caption{\label{fitness_landscape_onemax2} Fitness landscape of OneMax with two peaks}
+\end{figure}
+
+%Remember Laplace Exact Distribution does usually good for small populations and Exact Distribution + Exact Correction has again a low convergence rate but the best fitness with larger populations.
+
+\subsubsection{NK Landscape}
+
+From \cite{NKLandscape}:
+
+An NK landscape is a real-valued function defined on the set of binary \(n\)-tuples, \(\{0,1\}^{n}\), which is of the form
+
+\begin{equation}
+f (x_1, x_2, \dots, x_n) = \sum_{i=1}^{n} f_{i} (x_i, \prod (x_i))
+\end{equation}
+
+It is a summation of local fitness functions \(f_{i}\)'s, where each \(f_{i}\) depends on its main variable \(x_{i}\) and the variables in the neighborhood of \(x_{i}\). Here the neighborhood \(\prod (x_i)\) is a subset of the set \(\{x_{1}, x_{2}, \dots, x_{n}\} \\ \{x_{i}\}\) and its size \(|\prod_{k}(x_{i})|\) is \(k\). There are two ways to choose the variables in the neighborhood \(\prod (x_{i})\), adjacent neighborhood and random neighborhood. In the NK models with adjacent neighborhood, \(\prod(x_{i})\) consists of the closest \(k\) variables (with a certain to-break) to the main variable \(x_{i}\) with respect to the indices modulo \(n\). In the NK models with random neighborhood, \(\prod(x_{i})\) is composed of the \(k\) variables chosen uniformly at random from \(\{x_{1}, x_{2}, \dots, x_{n}\}\\\{x_{i}\}\). Local fitness functions are constructed independently of each other. For each local fitness function, a random value from a probability distribution is assigned for each input.\\
+
+We will use the implementation as \cite{MitchellPotter}, with 'Random(\(x\))' denoting a function that maps \(x\) to a predefined random value.
+\[
+f_{i} = \frac{\mbox{Random}(2^{k})}{2^{k}}
+\]
+
+That means that each pattern in an individual has an own random fitness value. If a new individual is created with a similar pattern, it gets the same fitness for this pattern. For \(k = 0\) we would get a similar function as OneMax as there are only two possible values for \(f_{i}\), i.e. we are counting '1's (or '0's). For large values of \(k\) this means that a large portion of memory is needed at the beginning (e.g. 4 GB for \(k = 32\)) so for the implementation we will use a hashtable.\\
+
+%Using the newly calculated distribution \(p_{i}\) for each component \(i\) we generate the new population of the size \(M\) depending on our option called {\bf Exact Random Distribution}. If it is not set we create each member of the population individually, if it is set we distribute \(p \cdot M\) '1's and \((1-p)M\) '0's between the individuals.\\
+
+
+\section{Options}
+
+\subsection{Boundary check (BD)}
+
+\begin{wrapfigure}{r}[0cm]{5.5cm}
+%%\begin{figure}[H]
+\includegraphics[scale=0.4]{graph_NC_BD_correction.eps}
+\caption{\label{correction_1}}
+%% Graphs of the exact distribution correction function}
+%%\end{figure}
+\end{wrapfigure}
+
+Another option is called {\bf bounded\}. If it is set the boundaries of the final \(p\) are checked. In the case \(p\) gets above \(1 - \beta\) or below \(\beta\) it is corrected to these boundaries:
+
+\[
+p = \left\{
+\begin{array}{l l}
+\beta & \quad \mbox{for \(p < \beta\)}\\
+1 - \beta & \quad \mbox{for \(p > 1 - \beta\)}\\
+p & \quad \mbox{else}\\
+\end{array}
+\right.
+\]
+
+\begin{figure}[H]
+\includegraphics[scale=0.5]{graph_bounded_plateau_fitness1.eps}
+\includegraphics[scale=0.5]{graph_bounded_plateau_fitness2.eps}
+\caption{\label{plateau_bounded_fitness_1}Different values for \(\beta\), optimum at about 0.005 in this case}
+\end{figure}
+
+If \(\beta\) is too large the function will have problems preserving the solution. For example in the case of a OneMax problem in a situation where we have found 99 of 100 correct '1's we have to hope that none of the 99 positions will switch back to a '0' in order to find 100 '1's. 
+The fitness level where a method with boundary check is expected to converge depends on all the parameters: the problem size, the population size, the problem type and the correction type. Thu
+TODO
+
+%It is clear that \(\beta\) should not be too large
+
+
+%depends on the population size \(M\)?
+
+%TODO, nicht 1/M sondern 1/alpha!
+
+This is only useful for some of the correction algorithms that will stuck when reaching values near 0 or 1 for \(p\), i.e. if the selected part of the population contains only '0's or '1's in any component and the algorithm calculated \(p = 0.0\) or \(p = 1.0\). The boundary check theoretically ensures that any algorithm will find the optimal solution \emph{eventually} while reducing the convergence speed because values that are already determined to be optimal can be changed. In practice this is of not much use if it is the only method to prevent diversity loss but it might increase the effectiveness of some of the algorithms if the algorithm is allowed to run a very long time, see section {\bf Tests} for a comparison. Generally speaking adding the bounded option to an algorithm will reduce its convergence speed significantly but will catch up and even surpass the original algorithm several generations later depending on the parameters and the problem. TODO kuerzen
+
+When combining Boundary Check with any of the Correction algorithms we will face the same problem as discussed with Exact Distribution. When we change our \(p\) we will also have to adapt the Correction methods. This probably have to researched TODO
+An issue which will not be discussed here is that when using boundary check, our diversity will change and we would need to adapt our correction formulas accordingly if we want to use them in connection with boundary check. TODO
+
+You can see here that with boundary check the diversity is held at a constant level. For each component there is always at least a chance of \(\frac{1}{M}\) to switch between '0' and '1'. On the one side this has the positive effect that theoretically the optimal solution will be found. On the other hand single components that already contain an optimal value can switch back to the wrong value. TODO
+
+%TODO Vergleiche innerhalb von Gruppen, also No correction No correction+bounded, diversity correction mit diversity correction+bounded etc.
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_no_correction_bounded_diversity0.eps}
+\includegraphics[scale=0.35]{graph_onemax_no_correction_bounded_diversity1.eps}
+\caption{\label{bounded_1} With boundary check the diversity is held at a constant level}
+\end{figure}
+
+For onemax we clearly see that these two opposite effects let the function converge at a lower level:
+
+%TODO While it has a chance to find a better solution (in contrary to the method without correction) it has trouble keeping up the correct values that were found so far.
+
+%TODO With higher population sizes this effect vanishes as \(\frac{1}{M}\) becomes smaller.
+
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_no_correction_bounded_fitness0.eps}
+\includegraphics[scale=0.35]{graph_onemax_no_correction_bounded_fitness1.eps}
+\caption{\label{bounded_2} With boundary check the diversity is held at a constant level}
+\end{figure}
+
+\begin{figure}[H]
+\hspace{-0.5in}
+\includegraphics[scale=0.5]{graphs/graph_onemax1161008942/graph_onemax000_diversity.eps}
+\includegraphics[scale=0.5]{graphs/graph_onemax1161008942/graph_onemax000_diversity.eps}
+\caption{\label{bounded_2} TEST}
+\end{figure}
+
+\subsection{Laplace Correction (LC)}
+
+\begin{wrapfigure}{r}[0cm]{5.5cm}
+%%\begin{figure}[H]
+\includegraphics[scale=0.4]{graph_LC1_correction.eps}
+\caption{\label{correction_1}}
+%% Graphs of the exact distribution correction function}
+%%\end{figure}
+\end{wrapfigure}
+
+Laplace correction is more or less the standard (\cite{LaplaceStandard}) in connection with UMDA. It biases the resulting \(p\) towards \(\frac{1}{2}\) and ensures that components do not get stuck at \(p = 1.0\) or \(p = 0.0\). The general formula for Laplace correction for a component \(i\) is
+\begin{equation}
+p_{i} = \frac{k_{i} + \alpha}{M + 2\alpha}
+\end{equation}
+
+Unfortunately the optimal value for \(\alpha\) depends on the type of the problem and the problem parameters. While we have approximately \(\alpha = 0.03\) as the optimal value in figure~(\ref{laplace_alpha_1}), in figure~(\ref{laplace_alpha_1}) we have approximately \(\alpha = 0.15\) as the optimal value.
+
+\begin{figure}[H]
+\includegraphics[scale=0.5]{graph_laplace_alpha_onemax_fitness.eps}
+\caption{\label{laplace_alpha_1} \(\alpha\) influences the effectiveness of Laplace correction}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[scale=0.5]{graph_laplace_alpha_plateau_fitness1.eps}
+\caption{\label{laplace_alpha_1} \(\alpha\) influences the effectiveness of Laplace correction}
+\end{figure}
+
+\begin{figure}[H]
+\includegraphics[scale=0.5]{graph_laplace_alpha_onemax_fitness1.eps}
+\caption{\label{laplace_alpha_1} Higher values of \(\alpha\) will cause difficulties to protect correct values from }
+\end{figure}
+
+
+%TODO
+
+\subsection{Laplace Remember Correction (LRC)}
+
+Another option is to include the distribution vector of the previous generation. We will replace \(\alpha\) in the numerator with \(\tilde{\alpha} = \alpha p_{t;i}\) where \(p_{t+1}\) denotes the new and \(p_{t}\) denotes the old distribution vector:
+
+\[
+p_{t+1;i} = \frac{k_{i} + \alpha p_{t;i}}{M + 2 \alpha}
+\]
+Here we have of course no automatic boundary check as with a constant \(\alpha\) in the numerator.\\
+We now will compare this method with Laplace with \(\alpha = 1.0\) (other values of \(\alpha\) simply in- or decrease the constant level of variance).
+
+Looking at the variance on a flat fitness landscape, we can clearly see that using the previous distribution vector \(p\) as alpha does not prevent diversity loss.
+TODO
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_flat_laplace_diversity0.eps}
+\includegraphics[scale=0.35]{graph_flat_laplace_diversity1.eps}
+\caption{\label{laplace_1} TODO}
+\end{figure}
+
+In the case of  ONEMAX: TODO
+- outperform laplace
+- higher population size - as usual - less advantage over no correction
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_laplace_fitness0.eps}
+\includegraphics[scale=0.35]{graph_onemax_laplace_fitness1.eps}
+\caption{\label{laplace_2} TODO}
+\end{figure}
+
+With this parameter settings and problem, higher values for \(\alpha\) will decrease the efficiency further:
+\begin{figure}[H]
+\includegraphics[scale=0.35]{graph_onemax_laplace_fitness0.eps}
+\caption{\label{laplace_3}  TODO}
+\end{figure}
+
+\section{Comparison between the correction methods}
+
+TOOD
+
+%TODO test with small population sizes
+%TODO verschiedene Werte fuer Alpha in ein Diagramm
+
+
 \section{Fields of further research}
 
 According to \cite{Shapiro} the diversity loss of \(1 - \frac{1}{n}\) is independent of \(|A|\) and is valid for a whole class of so-called SML-EDAs, including UMDA, MIMIC, FDA or BOA. In this paper I have assumed that \(|A| = 2\), i.e. that a component can only take two different values. With values \(|A| > 2\) the proof has to be adapted from equation (5) on, depending on how one creates such a population. It also remains to be investigated how a similar correction of the diversity loss is possible with other methods than UMDA that fall into the category of the SML-EDAs. It is probable that the idea itself, i.e. determining the loss of variance due to sampling and calculating it backwards in order to correct the distribution \(p\), seems to be applicable to many different forms of SML-EDAs or even EDAs in general - assuming one can calculate the actual diversity loss.
+\newpage
 
 \begin{thebibliography}{99}
 \bibitem{Shapiro} {\sc Shapiro, J.L.:}  \textit{Diversity loss in general estimation of distribution algorithms}, 2006.
+\bibitem{Unknown1} {\sc Unkonwn:}  \textit{Source for |A| > 2 handling}.
+\bibitem{LaplaceStandard} {\sc Unkonwn:}  \textit{Source for Laplace Standard UMDA}.
+\bibitem{Muehlenbein} {\sc H. Muehlenbein and G. Paasz:}  \textit{From recombination of genes to the estimation of distributions: I. binary parameters.}, H.-M. Voigt, W. Ebeling, I. Rechenberg, and H.-P. Schwefel, editors, Parallel Problem Solving from Nature-PPSN IV, pages 178-187, Berlin, 1996. Springer. TODO
+\bibitem{MitchelPotter} {\sc Potter, M.A.:}  \textit{NK-landscape problem generator}.
+
+%http://www.comp.rgu.ac.uk/staff/ss/Publications/GECCO2005.pdf
+
 \end{thebibliography}
 \end{document}
 
