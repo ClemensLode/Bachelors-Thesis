@@ -16,21 +16,24 @@
 \chapter{Reducing diversity loss in estimation of distribution algorithms}
 
 \section{Introduction}
-Introduction:
 
-With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. 
+TODO
 
-The flat landscape is the simplest problem in which this can be studied.
-It was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class, and it was shown that using an exponentially large population size would avoid this.
+%%Introduction:
 
-In this paper I will look into a different approach to the problem of diversity loss
+%With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. 
 
+%The flat landscape is the simplest problem in which this can be studied.
+%It was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class, and it was shown that using an exponentially large population size would avoid this.
 
-Abstract.
-Using the same general class of EDAs as \cite{Shapiro} (probability model is build using only data sampled from the current probability model) and the result we come to the conclusion that by changing the distribution vector p accordingly to the population size \(n\) and the number of selected individuals \(\tilde{n}\), we can correct the diversity loss. This is true for a flat landscape and tests have shown that this correction also works for non-flat problems.
-
+%In this paper I will look into a different approach to the problem of diversity loss
 
 
+\section{Abstract}
+
+TODO
+
+%Using the same general class of EDAs as \cite{Shapiro} (probability model is build using only data sampled from the current probability model) and the result we come to the conclusion that by changing the distribution vector p accordingly to the population size \(n\) and the number of selected individuals \(\tilde{n}\), we can correct the diversity loss. This is true for a flat landscape and tests have shown that this correction also works for non-flat problems.
 
 %Abstract. A very general class of EDAs is deﬁned, on which universal results
 %on the rate of diversity loss can be derived. This EDA class, denoted SML-EDA,
@@ -50,7 +53,7 @@ Using the same general class of EDAs as \cite{Shapiro} (probability model is bui
 \newpage
 \section{Definitions}
 
-The diversity of a given population can be measured by the 'trace of the empirical co-variance matrix'.
+The diversity of a given population can be measured by the 'trace of the empirical co-variance matrix'.\\
 Let
 \begin{enumerate}
 \item \(C\): number of components of each individual\\
@@ -129,26 +132,25 @@ d_p = \sum_{k=0}^{n} v_k p_k
 
 What we want is to have a diversity of \(p (1 - p)\), exactly the variance of a population of infinite size. What we get is somewhat different. To determine by which factor our result differs from the wanted result, we divide our \(d_p\) by \(p(1-p)\):
 \[
-\frac{d_p}{p(1-p)} = \sum_{k=0}{n} \frac{kn - k^{2}}{n^{2}} p^{k} (1-p)^{n-k} {n \choose k} = 
+\frac{d_p}{p(1-p)} = \sum_{k=0}^{n} \frac{kn - k^{2}}{n^{2}} p^{k} (1-p)^{n-k} {n \choose k} = 
 \]
 \[
-\frac{1}{n^{2} p(1-p)} \sum_{k=0}{n} k (n-k) p^{k} (1-p)^{n-k} {n \choose k} =
+\frac{1}{n^{2} p(1-p)} \sum_{k=0}^{n} k (n-k) p^{k} (1-p)^{n-k} {n \choose k} =
 \]
 \[
-\frac{1}{n^{2}} \sum_{k=1}{n} k (n-k) p^{k-1} (1-p)^{n-k-1} {n \choose k}
+\frac{1}{n^{2}} \sum_{k=1}^{n} k (n-k) p^{k-1} (1-p)^{n-k-1} {n \choose k}
 \]
 
-It can be shown that this can be reduced further. The exact proove will be given elsewhere, here is just the observed result:
+It can be shown that this can be reduced further. The exact prove will be given elsewhere, here is just the observed result:
 \begin{equation}
 d = d_p = 1 - \frac{1}{n}
 \end{equation}
 So it is independant from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
-The formula will be generalized in chapter 3. TODO
+%% The formula will be generalized in chapter 3. TODO
 
 According to Shapiro \cite{Shapiro} we also know that selecting l individuals from this population of size n will result in a diversity loss (compared to \(p(1-p)\)) of the same factor \(1 - \frac{1}{n}\).
 
-To recap:
-
+To recap:\\
 We have a distribution \(p\) and we generate a new population of the size \(n\). In the optimal case \((n = \inf)\) we get the expected variance of \(p(1-p)\). We calculated that the real variance is \(p(1-p)(1 - \frac{1}{n})\) and we know that creating a new population and selecting \(\tilde{n}\) individuals from that population (in a flat fitness landscape) will result in the variance \(p(1-p)(1 - \frac{1}{\tilde{n}})\).
 
 Now, the idea is to not create the new population with \(p\) but with a distribution \(q\) that fulfills the equation 
@@ -203,26 +205,45 @@ For a set of values for \(n\) (with \(n = 2\tilde{n}\)) ranging from \(4\) (fart
 
 \newpage
 \section{Code}
-Finally we can put our results into a code:\\
-\\
-\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
-\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
-\ \ else\\
-\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
-\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
-\ \ else\\
-\ \ \ \ q\ =\ 0.5;\\
-\ \\
-or for the general formula with \(n \neq 2\tilde{n}\):\\
-\\
-\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
-\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
-\ \ else\\
-\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
-\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
-\ \ else\\
-\ \ \ \ q\ =\ 0.5;\\
-\\
+Finally we can put our results into a code (\(N = \tilde{n}\)):\\
+
+\begin{verbatim}
+if( p < 0.5*(1 - sqrt( (2*N-2) / (2*N-1) )) )
+    q = 0.5 * (1 - sqrt( 4*p*(1-p) * (2*N-1) / (2*N-2) ) );
+else
+if( p > 0.5*(1 + sqrt( (2*N-2) / (2*N-1) )) )
+    q = 0.5 * (1 + sqrt( 4*p*(1-p) * (2*N-1) / (2*N-2) ) );
+else
+    q = 0.5;
+\end{verbatim}
+
+%\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
+%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
+%\ \ else\\
+%\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (2$\ast$\(\tilde{n}\)-{}2)\ /\ (2$\ast$\(\tilde{n}\)-{}1)\ ))\ )\\
+%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (2$\ast$\(\tilde{n}\)-{}1)\ /\ (2$\ast$\(\tilde{n}\)-{}2)\ )\ );\\
+%\ \ else\\
+%\ \ \ \ q\ =\ 0.5;\\
+
+or for the general formula with \(n \neq 2\tilde{n}\) (\(M = n, N = \tilde{n}\)):\\
+         
+\begin{verbatim}
+if( p < 0.5 * (1 - sqrt( ((N-1)*M) / ((M-1)*N) ) ) )
+    q = 0.5 * (1 - sqrt( 4*p*(1-p) * ((M-1)*N) / ((N-1)*M) ) );
+else 
+if( p > 0.5 * (1 + sqrt( ((N-1)*M) / ((M-1)*N) ) ) )
+    q = 0.5 * (1 + sqrt( 4*p*(1-p) * ((M-1)*N) / ((N-1)*M) ) );
+else
+    q = 0.5;
+\end{verbatim}
+
+%\ \ if(\ p\ \(<\){}\ 0.5$\ast$(1\ -{}\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
+%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ -{}\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
+%\ \ else\\
+%\ \ if(\ p\ \(>\){}\ 0.5$\ast$(1\ +\ sqrt(\ (\(\tilde{n}\)-{}1)$\ast$n\ /\ ((n-{}1)$\ast$\(\tilde{n}\))\ )\ )\ )\\
+%\ \ \ \ q\ =\ 0.5\ $\ast$\ (1\ +\ sqrt(\ 4$\ast$p$\ast$(1-{}p)\ $\ast$\ (n-{}1)$\ast$\(\tilde{n}\)\ /\ ((\(\tilde{n}\)-{}1)$\ast$n)\ )\ );\\
+%\ \ else\\
+%\ \ \ \ q\ =\ 0.5;\\
 
 The main advantage of this code is that only minimal changes to the code have to be made because this way of reducing the diversity loss is problem independant (at least for bitstrings on a flat landscape in UDMA). The code has to be inserted just after determining the distribution \(p\).
 
@@ -230,7 +251,7 @@ The main advantage of this code is that only minimal changes to the code have to
 \section{Multiple components}
 
 If we set \(C > 1\), i.e. bitstrings longer than one bit, we will get similar results. While equation \(3\) does use \(C\) to determine the diversity of a generated population we can look at each component seperately as they are not connected in UMDA (in a flat fitness landscape). All bits belonging to one component in the population are created with an own distribution \(p\) that is independant from the other \(p\). Therefor we can handle a problem with \(C > 1\) like \(C\) seperate problems, each with one component.
-How interconnected components would affect the diversity out of the scope of this paper and remains to be investigated.
+How interconnected components would affect the diversity is out of the scope of this paper and remains to be investigated.
 
 
 \newpage
@@ -238,22 +259,80 @@ How interconnected components would affect the diversity out of the scope of thi
 
 \subsection{General test configuration}
 
-UMDA
+TODO
 
 \subsection{'Needle in a Haystack' problem}
 
-flat fitness landscape
+TODO
 
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack0.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack1.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack2.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack3.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack4.png}
+\end{figure}
+
+Graphs 6 - 10 are with correction of extreme values of p (\(p = 0.0 or p = 1.0\))
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack5.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack6.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack7.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack8.png}
+\end{figure}
+
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_haystack9.png}
+\end{figure}
+
+
+\newpage
 \subsection{OneMax problem}
 
+TODO
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_onemax0.png}
+\end{figure}
 
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_onemax1.png}
+\end{figure}
 
+\begin{figure}[h!]
+\includegraphics[scale=0.4]{graph_onemax2.png}
+%\caption{description}
+\end{figure}
+
+\newpage
 \section{Conclusions}
 
+TODO
 
 \section{Fields of further research}
 
-In the following chapter I will run several tests with different parameters. In the third chapter I will discuss further applications~
+TODO
 
 \begin{thebibliography}{99}
 \bibitem{Shapiro} {\sc Shapiro, J.L.:}  \textit{Diversity loss in general estimation of distribution algorithms}, 2006.
