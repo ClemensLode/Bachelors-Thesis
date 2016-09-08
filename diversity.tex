@@ -1,0 +1,305 @@
+\documentclass[a4paper,twoside]{report}
+
+\usepackage{graphicx}
+\usepackage{dsfont}
+
+\input{Rahmen_Top}
+
+
+\title{Reducing diversity loss in estimation of distribution algorithms}
+\author{Clemens Lode, J"urgen Branke, John Shapiro}
+
+\input{Rahmen_Mid}
+
+
+\setcounter{chapter}{0}
+\section{Introduction}
+Introduction:
+
+With inappropriate settings, many EDAs can reach a state from which the probability of ever finding the optimum is zero. This is due to diversity loss which cannot be restored. If any component of the data vectors does not take one of its allowed values anywhere in the entire population, that value can never be restored. If that value is required in the optimum, the optimum will never be sampled. 
+
+The flat landscape is the simplest problem in which this can be studied.
+It was shown that this diversity loss is the same for a whole class of EDAs. A consequence of this is that for a problem which is almost everywhere flat, such as the Needle problem, the probability of diversity loss before the optimum is sampled is also universal for the class, and we have shown that it requires an exponentially large population size to avoid this.
+
+    It is important to go beyond these results. In many other search problems, the land-
+scape will not be ﬂat, but there will be many directions which are essentially ﬂat. It
+was shown in UMDA[5] and PBIL [4] that the rate of diversity loss relative to the rate
+of search in non-ﬂat directions helped to understand how control parameters needed to
+be set to ensure a reasonable probability of ﬁnding the optimum. Presumably the same
+will be true in arbitrary EDAs. However, unlike diversity loss, I expect that search in the
+non-ﬂat dimensions not to be universal, but to depend on the structure of the probability
+model. This remains to be investigated.
+
+\newpage
+\section{Definitions}
+
+The diversity of a given population can be measured by the 'trace of the empirical co-variance matrix'.
+Let
+
+\(C\): number of components of each individual\\
+\(M\): number of individuals in the population\\
+\(A\): set of different values a component can take\\
+\(|A|\): number of different values a component can take\\
+\(a\): 
+
+\begin{equation}
+x^{\mu}_{i} \text{: component i of individual \(\mu\)}
+\end{equation}
+
+\begin{equation}
+v^{a}_{i} = \frac{1}{M} \sum_{\mu=1}^{M} \varphi(x^{\mu}_{i} = a)
+\end{equation}
+
+\begin{equation}
+v = \frac{1}{|A|} \sum_{i=1}^{C} \sum_{a=0}^{|A|-1} v^{a}_{i} (1 - v^{a}_{i})
+\end{equation}
+
+Our goal is to determine the resulting diversity of a population created on a given distribution \(p\), so we have to calculate all possible combinations of individuals in that populations of the size \(M\). For now we are looking at strings of the size 1, i.e. \(C = 1\).
+
+To create a population with the distribution p each individual has in its component with the probability p a '1' (or with the probability (1-p) a '0').
+Creating a population with the size of \(M\) with \(|A|\) different values in each component we then have a combination with repetition, i.e. there would be
+\begin{equation}
+\frac{(|A|+M-1)!}{M!(|A|-1)!} = {|A|+M-1 \choose M}
+\end{equation}
+
+possible different population. For example for \(|A|=2\) there would be \(M+1\) different populations (...000, ...001, ...011, ...111, ...) as the position of an individual in the population is not important. We will now look at bitsrings~
+
+The probability for a certain population is 
+
+\begin{equation}
+p_k = p^k (1 - p)^{n - k} {n \choose k}
+\end{equation}
+with \(k\) being the number of '1's.
+
+With a random \(|A|\) there would be \(
+
+
+We further define a \(v_k\) which represents the diversity for a population with \(k\) '1's.
+The \(v^{a}_i\) values of a \(v_k\) with a given \(k\) is then:
+\begin{equation}
+v^{a}_i(k) = \frac{1}{n} \sum_{\mu=1}^{n} \varphi(x^{\mu}_i(k) = a)
+\end{equation}
+
+As we have defined k as the number of '1's and set m = 1 the sum over all \(\varphi(x^{\mu}_i = 1)\) is k (and the sum over all \(\varphi(x^{\mu}_i = 0)\) is \(n-k\)).
+
+Therefore our \(v^{a}_1\) (we only need the \(v^{a}_1\)'s because we only have one component, i.e. m = 1) is:
+\[
+\(v^{0}_1 = \frac{n-k}{n}
+\]
+\[
+\(v^{1}_1 = \frac{k}{n}
+\]
+
+We define the diversity of a given population (with \(k\) '1's) as
+\begin{equation}
+v_k = \frac{1}{2} \sum_{i=1}^{C} \sum_{a=0}^{|A| - 1} v^{a}_i (1 - v^{a}_i)
+\end{equation}
+
+In our case, with bits (\(|A| = 2\)) and one component (\(C = 1\)) we get the following:
+\[
+v_k = \frac{1}{2} \sum_{i=1}^{1} \sum_{a=0}^{1} v^{a}_i (1 - v^{a}_i) = 
+      \frac{1}{2} [v^{0}_1(1-v^{0}_1) + v^{1}_1(1 - v^{1}_1)] =
+      \frac{1}{2} [\frac{n-k}{n} (1 - \frac{n-k}{n}) + \frac{k}{n} (1 - \frac{k}{n}] = 
+      \frac{1}{2} (\frac{n-k}{n} - \frac{(n-k)^{2}}{n^{2}} + \frac{k}{n} - \frac{k^{2}}{n^{2}}) = 
+      \frac{kn - k^{2}}{n^{2}}
+\]
+
+Our total diversity \(d_p\) for a given distribution p is
+\begin{equation}
+d_p = \sum_{k=0}^{n} v_k p_k
+\end{equation}
+
+What we want is to have a diversity of \(p (1 - p)\), exactly the variance of a population of infinite size. What we get is somewhat different. To determine by which factor our result differs from the wanted result, we divide our \(d_p\) by \(p(1-p)\):
+\[
+\frac{d_p}{p(1-p)} = \frac{\sum_{k=0}{M} \frac{kM - k^{2}}{M^{2}} p^{k} (1-p)^{M-k} {M \choose k} = 
+\frac{1}{M^{2} p(1-p)} \sum_{k=0}{M} k (M-k) p^{k} (1-p)^{M-k} {M \choose k} =
+\frac{1}{M^{2}} \sum_{k=1}{M} k (M-k) p^{k-1} (1-p)^{M-k-1} {M \choose k}
+\]
+
+It can be shown that this can be reduced further. The exact proove will be given elsewhere, here is just the observed result:
+\begin{equation}
+d = d_p = 1 - \frac{1}{M}
+\end{equation}
+So it is independant from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
+The formula will be generalized in chapter 3. TODO
+
+
+According to Shapiro \cite{Shapiro} we also know that selecting l individuals from this population of size n will result in a diversity loss (compared to \(p(1-p)\)) of the same factor \(1 - \frac{1}{n}\).
+
+To recap:
+
+We have a distribution \(p\) and we generate a new population of the size \(M\). In the optimal case \((M = \inf)\) we get the expected variance of \(p(1-p)\). We calculated that the real variance is \(p(1-p)(1 - \frac{1}{M})\) and we know that creating a new population and selecting \(N\) individuals from that population (in a flat fitness landscape) will result in the variance \(p(1-p)(1 - \frac{1}{N})\).
+
+Now, the idea is to not create the new population with \(p\) but with a distribution \(q\) that fulfills the equation 
+\begin{equation}
+\(p(1-p)=xq(1-q)\) 
+\end{equation}
+
+with \(x\) fulfilling the equation:
+
+\begin{equation}
+1 - \frac{1}{N} = x( 1 - \frac{1}{M} ) \Leftrightarrow 
+x = \frac{(N-1)M}{(M-1)N}
+\end{equation}
+
+So we have:
+\[
+p(1-p) = q(1-q) \frac{(N-1)M}{(M-1)N} 
+\Leftrightarrow
+-q^2 + q - (-p^2 + p) \frac{(M-1)N}{(N-1)M} = 0
+\Leftrightarrow
+q_1/2 = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(M-1)N}{(N-1)M}})
+\]
+
+For the case of \(N = \frac{M}{2}\) (i.e. we selected \(N\) individuals from the population) we would get
+\[
+q_1/2 = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(N-1)2N}{(2N-1)N}}) = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{2N-2}{2N-1}})
+\]
+
+Putting that into a code fragment we can put our results in this:\\
+\\
+if(p<0.5*(1-sqrt((2N-2)/(2N-1)) then\\
+\ \ q=0.5*(1-sqrt(4*(2N-1)/(2N-2)*p*(1-p)));\\
+else if p > 0.5*(1+sqrt((2N-2)/(2N-1)))\\
+\ \ q=0.5*(1+sqrt(4*(2N-1)/(2N-2)*p*(1-p)));\\
+else // we can not increase variance beyond 0.5\\
+\ \ q=0.5;\\
+\\
+or for the general formula:\\
+\\
+if(p<0.5*(1-sqrt((N-1)M/((M-1)N)) then\\
+\ \ q=0.5*(1-sqrt(4 * (M-1)N/((N-1)M) * p * (1-p)));\\
+else if p > 0.5*(1 + sqrt( (N-1) * M / ((M-1)*N)))\\
+\ \ q=0.5*(1+sqrt(4 * (M-1)N/((N-1)M) * p * (1-p)));\\
+else // we can not increase variance beyond 0.5\\
+\ \ q=0.5;\\
+
+The nice thing about it is that it's problem independant, just add this code after determining your p and get a significant performance boost.
+
+In the following chapter I will run several tests with different parameters. In the third chapter I will discuss further applications~
+
+\newpage
+\section{Tests}
+
+\newpage
+\section{|A| > 2}
+The probability for a certain population is 
+
+\begin{equation}
+p_k = p^k (1 - p)^{n - k} {n \choose k}
+\end{equation}
+with \(k\) being the number of '1's.
+
+With a random \(|A|\) there would be \(
+
+
+We further define a \(v_k\) which represents the diversity for a population with \(k\) '1's.
+The \(v^{a}_i\) values of a \(v_k\) with a given \(k\) is then:
+\begin{equation}
+v^{a}_i(k) = \frac{1}{n} \sum_{\mu=1}^{n} \varphi(x^{\mu}_i(k) = a)
+\end{equation}
+
+As we have defined k as the number of '1's and set m = 1 the sum over all \(\varphi(x^{\mu}_i = 1)\) is k (and the sum over all \(\varphi(x^{\mu}_i = 0)\) is \(n-k\)).
+
+Therefore our \(v^{a}_1\) (we only need the \(v^{a}_1\)'s because we only have one component, i.e. m = 1) is:
+\[
+\(v^{0}_1 = \frac{n-k}{n}
+\]
+\[
+\(v^{1}_1 = \frac{k}{n}
+\]
+
+We define the diversity of a given population (with \(k\) '1's) as
+\begin{equation}
+v_k = \frac{1}{2} \sum_{i=1}^{C} \sum_{a=0}^{|A| - 1} v^{a}_i (1 - v^{a}_i)
+\end{equation}
+
+In our case, with bits (\(|A| = 2\)) and one component (\(C = 1\)) we get the following:
+\[
+v_k = \frac{1}{2} \sum_{i=1}^{1} \sum_{a=0}^{1} v^{a}_i (1 - v^{a}_i) = 
+      \frac{1}{2} [v^{0}_1(1-v^{0}_1) + v^{1}_1(1 - v^{1}_1)] =
+      \frac{1}{2} [\frac{n-k}{n} (1 - \frac{n-k}{n}) + \frac{k}{n} (1 - \frac{k}{n}] = 
+      \frac{1}{2} (\frac{n-k}{n} - \frac{(n-k)^{2}}{n^{2}} + \frac{k}{n} - \frac{k^{2}}{n^{2}}) = 
+      \frac{kn - k^{2}}{n^{2}}
+\]
+
+Our total diversity \(d_p\) for a given distribution p is
+\begin{equation}
+d_p = \sum_{k=0}^{n} v_k p_k
+\end{equation}
+
+What we want is to have a diversity of \(p (1 - p)\), exactly the variance of a population of infinite size. What we get is somewhat different. To determine by which factor our result differs from the wanted result, we divide our \(d_p\) by \(p(1-p)\):
+\[
+\frac{d_p}{p(1-p)} = \frac{\sum_{k=0}{M} \frac{kM - k^{2}}{M^{2}} p^{k} (1-p)^{M-k} {M \choose k} = 
+\frac{1}{M^{2} p(1-p)} \sum_{k=0}{M} k (M-k) p^{k} (1-p)^{M-k} {M \choose k} =
+\frac{1}{M^{2}} \sum_{k=1}{M} k (M-k) p^{k-1} (1-p)^{M-k-1} {M \choose k}
+\]
+
+It can be shown that this can be reduced further. The exact proove will be given elsewhere, here is just the observed result:
+\begin{equation}
+d = d_p = 1 - \frac{1}{M}
+\end{equation}
+So it is independant from \(p\), but we still have assumed \(|A| = 2\) and \(C = 1\). Tests have shown that we get the same result with a random value of \(C\) and \(|A|\), although the formula in between will be different, especially (4).
+The formula will be generalized in chapter 3. TODO
+
+
+According to Shapiro \cite{Shapiro} we also know that selecting l individuals from this population of size n will result in a diversity loss (compared to \(p(1-p)\)) of the same factor \(1 - \frac{1}{n}\).
+
+To recap:
+
+We have a distribution \(p\) and we generate a new population of the size \(M\). In the optimal case \((M = \inf)\) we get the expected variance of \(p(1-p)\). We calculated that the real variance is \(p(1-p)(1 - \frac{1}{M})\) and we know that creating a new population and selecting \(N\) individuals from that population (in a flat fitness landscape) will result in the variance \(p(1-p)(1 - \frac{1}{N})\).
+
+Now, the idea is to not create the new population with \(p\) but with a distribution \(q\) that fulfills the equation 
+\begin{equation}
+\(p(1-p)=xq(1-q)\) 
+\end{equation}
+
+with \(x\) fulfilling the equation:
+
+\begin{equation}
+1 - \frac{1}{N} = x( 1 - \frac{1}{M} ) \Leftrightarrow 
+x = \frac{(N-1)M}{(M-1)N}
+\end{equation}
+
+So we have:
+\[
+p(1-p) = q(1-q) \frac{(N-1)M}{(M-1)N} 
+\Leftrightarrow
+-q^2 + q - (-p^2 + p) \frac{(M-1)N}{(N-1)M} = 0
+\Leftrightarrow
+q_1/2 = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(M-1)N}{(N-1)M}})
+\]
+
+For the case of \(N = \frac{M}{2}\) (i.e. we selected \(N\) individuals from the population) we would get
+\[
+q_1/2 = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{(N-1)2N}{(2N-1)N}}) = \frac{1}{2} (1 \pm \sqrt{1 - 4 (-p^2 + p) \frac{2N-2}{2N-1}})
+\]
+
+Putting that into a code fragment we can put our results in this:\\
+\\
+if(p<0.5*(1-sqrt((2N-2)/(2N-1)) then\\
+\ \ q=0.5*(1-sqrt(4*(2N-1)/(2N-2)*p*(1-p)));\\
+else if p > 0.5*(1+sqrt((2N-2)/(2N-1)))\\
+\ \ q=0.5*(1+sqrt(4*(2N-1)/(2N-2)*p*(1-p)));\\
+else // we can not increase variance beyond 0.5\\
+\ \ q=0.5;\\
+\\
+or for the general formula:\\
+\\
+if(p<0.5*(1-sqrt((N-1)M/((M-1)N)) then\\
+\ \ q=0.5*(1-sqrt(4 * (M-1)N/((N-1)M) * p * (1-p)));\\
+else if p > 0.5*(1 + sqrt( (N-1) * M / ((M-1)*N)))\\
+\ \ q=0.5*(1+sqrt(4 * (M-1)N/((N-1)M) * p * (1-p)));\\
+else // we can not increase variance beyond 0.5\\
+\ \ q=0.5;\\
+
+The nice thing about it is that it's problem independant, just add this code after determining your p and get a significant performance boost.
+
+
+
+
+\begin{thebibliography}{99}
+\bibitem{Shapiro} {\sc Shapiro, J.L.:}  \textit{Diversity loss in general estimation of distribution algorithms}, 2006.
+\end{thebibliography}
+\end{document}
+
